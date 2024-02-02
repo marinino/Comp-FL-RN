@@ -17,19 +17,10 @@ const HomeScreen = () => {
       // No need to call updateData here, as it will be triggered in the useFocusEffect
       groupDataByFirstLetter();
       handleForceRender()
-    });
-  }, [navigation]);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      // The screen is focused
-      // Call any action to update the screen
-      // In this example, let's just log a message to the console
-      console.log('HomeScreen is focused. Data has changed.' + data.length);
-      groupDataByFirstLetter();
-      
-    }, [data, forceRender])
-  );
+    });
+  }, [data]);
+
 
   const handleForceRender = () => {
     // Update the state variable to force a re-render

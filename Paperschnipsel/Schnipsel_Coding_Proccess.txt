@@ -1,0 +1,113 @@
+The first step was visting the Flutter and React Native docs. What might be kind of confusing with the React Native documentation is the fact, that are two ways to setup up React Native projects, there is Expo and there is the React Native CLI. It is kind of unclear what is the difference though and at the start, when you are just getting started there might be some confusion. As these differences in the React Native framework will play a role later on I will quickly go over the two approaches, their advantages and when to use them. First of all we will be looking at Expo, basically when generating an Expo project you will get a folder containing you project and a localhost port on which the application is running. Then a mobile device with the Expo Go app installed can be used to connct to the application running. This has the advantage, that there is no emmulator needed on the development machine. In addition to that there is no need to create and configure emulators, which can be time consuming. The downside to this is, that when using an virtual device as an emulator, there is the possibility to test different versions of the operating system and in general different devices with unique properties. In comparison to the React Native CLI approach the Expo approach has plenty of advantages, first of all you can create a project with prebuilt libraries . This can be useful if you create plenty of similar projects which all have similar dependecies, which you can include in a template in order for the projects to always be created equally. Furthermore the build proccess is a simpler in Expo from a developer standpoint, as Expo handles the build proccess on its own, the developer does not need to worry about that. A very nice thing about Expo is that apps can be build for IOS and Android no matter the development device is. So for exmaple a IOS application can be created on a Windows device, which normally is not possible. And as already mentioned it is really is to connect physical devices and let your application run on that. Obviously there are some downside to using Expo, the first big disadvantage is that expo only allows you to use a limited amount of native modules. For example the filesystem module or webviews do not really work in expo. This may lead to some issues, when using certain third-party libraries, which can be turn out to be a big problem, especially in bigger applications. As already mentioned Expo performs the build proccess completly on its own, which can be good in certain situations but obviously there is a loss of control from a developer standpoint. So that feature can also be taken as a disadvantage, depending on the situation. Something may seem weird in the first place is that Expo apps tend to be larger in bundle size.  On the first look, the expo projects seems really compact and more lightweight in comparison to a React Native CLI, but the larger size of the Expo project can have negative effects on things like download and loading times. Personally I experienced that issue with accessing the file system in Expo, after some googleing you will eventually find out what the issue is, but in the first place that is really confussing, because as in the beginning you may actaully completly miss the fact that there actually is a differnce between Expo and the React Native CLI. Now look at the React Native CLI, the first big advantage is that there are no restrictions on using any native modules, which widens the realms of what you can do a lot. The devloper has complete control over the build, this can be helpful if the developer is very experienced or if some modifications in the build mesut be done. There is also a much bigger ecosystem and tool support for the React Native CLI, and in constrast to Expo there is no restriction on third party libraries. The problem with all the above is that this steepens the leraning curve a lot, especially for a beginner Expo creates a much easier starting point a lower entry bar. In addition to that the setup takes time, this is again something which is not an issue for an experienced developer as the initial setup might not take that much time, but for beginners that may be an issue. The same thing goes for the build proccess, which is in contrast to Expo not automated. Maybe the biggest disadvantage is that the EAS does not work with the React Native CLI, so in order the create an IOS application you need a Macbook. Now the question is what approach works better in which scenario? Well simply but, Expo is more beginner friendly and the React Native CLI is for more experienced developers. Another case in which Expo would be a good choice is something like quick prototyping, when you just try to create quick little examples and deep functionality Expo offers first of all the comfort of the template for creating similar projects multiple times and the quick set up helps to just run the application with no big configuration work. In addition to that is Expo are good approach if no low-level device features are used. Low-level device features are things like the camera, GPS, access to the filesystem and so on and so forth. If simplicity is more important in your development proccess than customizability then again Expo is a good idea. This may be the case for internal projects or for a mock application or something like that. But as Expo can be seen as kind of limited, you could say as soon as are real application is vuild for a costumer Expo is already not an option any more. Because as soon as you need a third party library or one of the low-level device features mentioned above, using React Native CLI is a necesity. The same goes obviously for customizing the build proccess or performance optimizations of some sort. Now shortly to the setup of the two IDEs being used in the development proccess. Flutter was conded in Android Studio from the start, the checkers game in React Native was also coded in Android Studio. The setup Android studio setup was pretty easy as the setup was already done. Setting up an IDE alsways has its difficulties and there some things which need to be taken into account setting up Android Studio, with environment variables and getting the emulators to run but in general the general setup is not more difficult or easy than any other IDE. Something that caught my eye with Android Studio was the fact, that the updates for the IDE had to be done manually, which is kind of weird in my eyes and I would generally not pick Android Studio as a very good IDE. The big advantage of Android studio though is the easy use of emulators. In combination with the hot reload feature of Flutter development is pretty easy. So in this very case Android Studio has some big advantages for mobile development. The Expo applications were coded in Visual Studio Code and the connection with the physical device was done via a normal command line. The setup here was really easy, as you can just create an Expo application via npx with one command and you are pretty much good to go.
+
+To collect the data three applications were built, all three were implemented in Flutter and React Native, making it a total of six applications to test. 
+
+The first application was a password manager, the purpose of this app is to test regular features, which many apps have and are core features of out every da mobile device use. The implementation includes text inputs, slider inputs, button inputs, pop ups and text outputs. The app consists of two screens, one for viewing your list of passwords the other one for generating your passwords. Above the list where all passwords can be seen, the total number of passwords is shown, the amount of strong passwords and the amount of mediocore passwords. This display is not actually changing with the content in the app, so the numbers are constants which are chosen in a realistic way. The list off passwords is ordered alphabetically and if one of the items in the list is tapped, a pop-up opens, where you can see the the E-Mail adress being used along with the password and the application the password is for.
+
+[Bild Liste Flutter und React]
+[Bild Pop-Up Detail Flutter und React]
+
+Via the navigation bar at the bottom of the application a second screen is reachable, where passwords are generated and saved. A the top of the screens there is a slider, which determines how long the password is going to be. The password can be between six and 20 characters long. Below that the amount of symbols, capital letters and digits can be determined, these values get increased or decreased by button inputs. The total number of the three inputs can not get above the value of the slider, which is checked when generating the password. In order to create a valid password the values must be adapted then. At the bottom just above the textfield where the generated password is displayed there are two buttons, one to generate a new password with the inputs from above and one to save the password. The generate button just puts the new value in the field below, while the save button opens a pop-up window.
+
+[Bild Generating Flutter und React]
+
+In the pop-up an E-Mail address along with an application name must be entered and on confirmation a new entry is made in the list where all the passwords are being kept.
+
+[Bild Pop-Up Save Flutter und React]
+
+Password Manager Flutter:
+
+The List was realized with a seperate class, which initializes a list and implements a method to add a new element to this list. The instances of the list were also a seperate class  with all the attributes needed for the list entry, including the password the E-Mail and the application. In addition to that the class also implemented a way to get the first letter of the application the entry is meant for to be able to order the items in the list. The pop-ups were realized with alert dialogs, which are provided by Flutter. In these alert dialogs text inputs buttons and other input elements can be added. The alert dialogs are put inside a method, so the only show, when the method is called and disapear on a button click. A thing I stumbled over while implementing the app was as getting the lists refreshed when a new password was added. The problem here is only because the tab is changed in the navigation bar does not mean that the screen gets re-rendered. Only if for example a pop-up is opended, then the screen gets re-rendered and the newly added entry in the list while get displayed. So what needs to be done is, we need to create a ChangeNotifierProvider which we create for our class implementing the list and then we can call the notifyListners method in the method we add our items to the list. The notifyListeners method triggers a notification to all the listeners, that the state has changed. The widgets in our ChangeNotifierProvider listen for the notifyListener now and therefore create a reactive application. This makes sure the shown content in the app always aligns with the content in the list. The rest of the implementation is pretty straight forward. Even the slider was pretty simple as it is a component provided by Flutter and documentation is quite good on it. In addition a wide variety of icons is provided for the navigation bar, which is quite nice and just adds to the look and feel of the application. Another positive aspect about Flutter is the fact that themes are provided and they are pretty easy to use, which makes coloring decisions a lot easier and makesthe application look a lot more professional with very little effort.
+
+Password Manager React Native:
+
+First of all it needs to be said, that this is a Expo Go project. A later project is done with the React Native CLI approach. Sometimes the over-the-air updates were not working correctly, so on save the aplication would not reload, then the reload had to be done maually. All in all was the Expo expericence not great beceause would also be times where a complete restart of the local application was necessary. The biggest difference which jumps out directly are the styleSheets, so styling can be done kind of remotly compared to Flutter. In my personal opinion I do not like that as much, but that is just a personal preference. The application build with a Tab navigator, which displays the different tabs and below the tabs there is a bottom navigation bar, all these components are regular React Native components. The way the appliation is build with all the components and features is meant to be as close to the Flutter app as possible. The slider for adjusting the password length here is actaully a community library being supported by Expo. The slider is actually part of the expo documentation, but still is a community project, so it is an package which needs to be installed via a packet manager. For the developer this is not big of an issue though, as the documentation in the Github is pretty good and the repository is maintained pretty well. As we already discussed with Flutter we again have the same issue here with keeping our user interface consistent with the data in the list of our passwords. In order to realize reactivity in React Native we need useState and useEffect hooks. A use state sets a varibale as a state so we can re-render out components, when the variable values are changed. So every time we focus the screen where the passwords are displayed we increase a state variable counter to trigger a re-render of the screen. In our App.js we declare the list, we access in the other files via a useContext. The useContext allows us to access out list of passwords in all the other screens and also allows us to set the list, if new elemnts get added. The list is realized via a section list and pop-ups are modals with changeable visibility.
+
+We need use States here, and one useContext, this is for updating the data being displayed in the table with all the passwords. Also the updateData, which is basically the pendant to the notifyListeners() from Flutter, is in this file and called when ever a new password instance is created. In the file for displaying the table we have the data again, with no way to update it, as this can only be done from the generate screen. In addition to that we always group our password by their first letter, when we focus that screen, plus we update a state variable to trigger  re-render in oder to always display the current state of the list. The list is realized with a SectionList and with the Pop-Up realized with a normal Modal
+
+
+
+Expo vs React Native CLI:
+Expo has the advantage of quick start, which makes start developing really easy without making any device specific setup.
+Expo advantages
+Over-the-air updates: 
+Basically the equivalent to hot reload, but Native CLI has that too
+Pre-built libraries:
+Expo provides wide range of pre-built APIs making some features easier to implememnt
+Simplified build process:
+Build procces is handled for the devloper
+EAS: 
+With this apps can be build for IOS without having a mac
+Native physical device:
+You can use yout own smartphone connected via Expo to test your device
+Expo disadvantages:
+Limited Native Modules:
+Expo restricts access to some native modules, filesystem and webview are things which are not really working in Expo
+Less control over build:
+As the build is automated that obviously takes away control from the developer
+Size and performance:
+Expo apps tend to be larger in bundle size, which can impact download and loading times
+
+Experienced issues with Expo Go:
+
+WebView and file system
+
+Advantages React Native CLI:
+Full Native Module Support: 
+No restrictions on Native Modlues
+Costumization options:
+Complete build control, which gives more control to the dev
+Ecosystem Compatibility:
+Also full compatibility with community libraries and tools
+Disadvantes React Native:
+Steeper learning curve:
+Takes longer to get into, also from personal experience
+Longer Development Setup Time:
+Native deps need to be installed and set up, so this takes time again
+Manual build proccess:
+Manually configure build tools, time-consuming and complex
+Native Physical device:
+Plattform specific device for Andriod and IOS, so you need the mac
+
+General when Expo, when Native CLI?
+
+Expo if:
+Beginner or quick prototyping
+No requirement of low-level device features
+Simplicity and ease of development is important
+
+
+React Native CLI if:
+Need for specific native modules or third-party libraries
+Extensive control over build proccess, preformance optimizations or costumization options is required
+Experienced developer wanting to learn more in depth stuff
+
+First app: Password Manager
+
+Flutter:
+
+Android studio setup was pretty easy as the setup was already done. The general setup is not more difficult or easy than any other IDE. Updates for the IDE were kind of weird, so that is certainly something which needs to be taken into an account. Updates need to be done manually. The big advantage of Android studio is the easy use of emulators. In combination with the hot reload feature of Flutter development is pretty easy. 
+
+The List was realized with a list provider.
+
+Pop-Up was realized with Alert dialog. 
+
+Apart from that implementation was pretty straight forward.
+
+Some logic checks were necessary for length purposes and also some checks for not letting string lengths get below 0.
+
+The Pop-Up was a slight issue as well as getting the lists refreshed, done via listeners i think. List provider class extends changeNotifier this lets us call notifyListeners to update the list. ChangeNotifierProvider creates context from ListProvider. Is called when context is changed, so when nearest widget is changed.
+
+App is build with Bottom navigation bar and has basically two screens, one on which you create passwords, the other where all the passwords can be viewed. The passwords are displayed in a ListView, which is sorted alphabetically. All the items in the list open a Pop-Up on tap, with information about that certain password. At the top of the list the total number of passwords is displayed along with the number of stronger passwords and medicore passwords. The primary use of this view is just the list and the Pop-Up which are both everyday uses in most applications. The second tab has a lot of UI elements, I use a slider to adjust the length of the password and buttons to modify certain aspects of the password. The modifications include the number of digits, symbols and capital letters. When saving a passowrd a E-Mail adress must be entered to also cover text input. At the bottom of the view we display the generated password. So we have a slider input, we have button inputs, we have text inputs and a text output.
+
+The slider here is a component provided by Flutter. A certain positive here is the fact, that np outside libraries are needed, even the button icons are directly from Flutter. 
+
+What is also very cool and very easy is the theme thing
+
+React Native:
+
+First of all it needs to be said, that this is a Expo Go project. A later project is done with the React Native CLI approach. Expo go setup was really easy, sometimes the over-the-air updates were not working correctly, so on save the aplication would reload, so you would have to reload manually.
+
+
+The biggest difference which just out directly are the styleSheets, so styling can be done kind of remotly compared to Flutter. In my personal opinion I do not like that as much, but that is just a personal preference.  
+The application build with a Tab navigator, which displays the different tabs and below the tabs there is a bottom navigation bar, all these components are regular React Native components. The way the appliation is build with all the components and features is meant to be as close to the Flutter app as possible. The slider for adjusting the password length here is actaully a community library being supported by Expo. We need use States here, and one useContext, this is for updating the data being displayed in the table with all the passwords. Also the updateData, which is basically the pendant to the notifyListeners() from Flutter, is in this file and called when ever a new password instance is created. In the file for displaying the table we have the data again, with no way to update it, as this can only be done from the generate screen. In addition to that we always group our password by their first letter, when we focus that screen, plus we udate a state variable to trigger  re-render in oder to always display the current state of the list. The list is realized with a SectionList and with the Pop-Up realized with a normal Modal
