@@ -1,11 +1,9 @@
-import { StatusBar } from 'expo-status-bar';
-import { Button, StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet,  View, Image, TouchableOpacity } from 'react-native';
 import { NavigationContainer, useNavigation  } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import React, { createContext, useState } from 'react';
 
-import { createStackNavigator } from '@react-navigation/stack';
 
 import HomeScreen from './components/HomeScreen';
 import CreatePassword from './components/CreatePassword';
@@ -17,7 +15,6 @@ const Tab = createBottomTabNavigator();
 
 export const DataContext = createContext();
 
-const Stack = createStackNavigator();
 
 
 const App = () => {

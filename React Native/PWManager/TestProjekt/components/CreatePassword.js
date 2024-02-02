@@ -1,11 +1,10 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { View, Text, StyleSheet, Button, Modal, TextInput } from 'react-native';
+import { ScrollView, View,  Text, StyleSheet, Button, Modal, TextInput } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { DataContext } from './../App';
 import { useNavigation } from '@react-navigation/native';
 
 const CreatePassword = () => {
-
     const [passwordLength, setPasswordLength] = useState(6);
     const [numberOfDigits, setNumberOfDigits] = useState(0);
     const [numberOfCaps, setNumberOfCaps] = useState(0);
@@ -19,13 +18,10 @@ const CreatePassword = () => {
     const navigation = useNavigation();
 
     const handleDataUpdate = (application, eMail) => {
-        // Handle data updates in CreatePassword
         data.push({application: application, eMail: eMail, password: generatedPassword})
-
         updateData(data);
     };
 
-    // Function to decrement the counter
     const decrementNumberOfDigits = () => {
         if(numberOfDigits >= 1){
             setNumberOfDigits(numberOfDigits - 1);
@@ -36,7 +32,6 @@ const CreatePassword = () => {
         setNumberOfDigits(numberOfDigits + 1);
     };
 
-    // Function to decrement the counter
     const decrementNumberOfCaps = () => {
         if(numberOfCaps >= 1){
             setNumberOfCaps(numberOfCaps - 1);
@@ -47,7 +42,6 @@ const CreatePassword = () => {
         setNumberOfCaps(numberOfCaps + 1);
     };
 
-    // Function to decrement the counter
     const decrementNumberOfSymbols = () => {
         if(numberOfSymbols >= 1){
             setNumberOfSymbols(numberOfSymbols - 1);
@@ -59,73 +53,61 @@ const CreatePassword = () => {
     };
 
     const generatePassword = () => {
-
-        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const chars = 'abcdefghijklmnopqrstuvwxyz';
+        const caps = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const digits = '0123456789';
-        const symbols = '!@#$%^&*()_+{}|:;<>,.?~-=[]"\''; // Add or modify symbols as needed
-      
+        const symbols = '!@#$%^&*()_+{}|:;<>,.?~-=[]"\'';
         let result = '';
-
         if(passwordLength < (numberOfCaps + numberOfDigits + numberOfSymbols)){
             return
         }
 
-         // Generate x characters
         for (let i = 0; i < passwordLength - (numberOfCaps + numberOfDigits + numberOfSymbols); i++) {
             result += chars.charAt(Math.floor(Math.random() * chars.length));
         }
 
-        // Generate y digits
         for (let i = 0; i < numberOfDigits; i++) {
             result += digits.charAt(Math.floor(Math.random() * digits.length));
         }
 
-        // Generate z capital letters
         for (let i = 0; i < numberOfCaps; i++) {
-            result += chars.toUpperCase().charAt(Math.floor(Math.random() * chars.length));
+            result += caps.toUpperCase().charAt(Math.floor(Math.random() * caps.length));
         }
 
-        // Generate m symbols
         for (let i = 0; i < numberOfSymbols; i++) {
             result += symbols.charAt(Math.floor(Math.random() * symbols.length));
         }
 
-        setGeneratedPassword(result)
+        console.log(result)
+        const shuffle = str => [...str].sort(()=>Math.random()-.5).join('');
+        console.log(shuffle(result))
+        setGeneratedPassword(shuffle(result))
     }
 
     const makeModalVisible = () => {
         setModalVisible(true);
-      };
-    
-      const savePassword = () => {
-        // Handle saving the password with the entered application and email
-        // Reset the modal state
-        setModalVisible(false);
-        setApplication('');
-        setEmail('');
-        console.log(application, email)
-        handleDataUpdate(application, email)
-      };
-    
-      const closeModal = () => {
-        // Reset the modal state
-        setModalVisible(false);
-        setApplication('');
-        setEmail('');
-      };
+    };
 
-      useEffect(() => {
-        const unsubscribe = navigation.addListener('focus', () => {
-          // The screen is focused
-          // Call any action to update the screen
-        });
-    
-        // Cleanup the listener when the component is unmounted
+    const savePassword = () => {
+        setModalVisible(false);
+        setApplication('');
+        setEmail('');
+        handleDataUpdate(application, email)
+    };
+
+    const closeModal = () => {
+        setModalVisible(false);
+        setApplication('');
+        setEmail('');
+    };
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {});
         return unsubscribe;
-      }, [data, navigation]);
+    }, [data, navigation]);
 
     return (
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.h1}>Create a password</Text>
             <Text style={styles.h2}>Build a strong password by using the properties below</Text>
 
@@ -147,19 +129,19 @@ const CreatePassword = () => {
                 <Button title='Decrease' onPress={decrementNumberOfDigits}></Button>
                 <Button title='Increase' onPress={incrementNumberOfDigits}></Button>
             </View>
-           
+
             <Text style={styles.labelsNumbers}>Number of capitals: {numberOfCaps}</Text>
             <View style={styles.numberButtons}>
                 <Button title='Decrease' onPress={decrementNumberOfCaps}></Button>
                 <Button title='Increase' onPress={incrementNumberOfCaps}></Button>
             </View>
-           
+
             <Text style={styles.labelsNumbers}>Number of symbols: {numberOfSymbols}</Text>
             <View style={styles.numberButtons}>
                 <Button title='Decrease' onPress={decrementNumberOfSymbols}></Button>
                 <Button title='Increase' onPress={incrementNumberOfSymbols}></Button>
             </View>
-           
+
             <View style={styles.generateSafeButtons}>
                 <Button title='Generate' onPress={generatePassword}></Button>
                 <Button title='Safe' onPress={makeModalVisible}></Button>
@@ -167,6 +149,9 @@ const CreatePassword = () => {
             <View style={styles.generatedPasswordView}>
                 <Text style={styles.passwordText}>{ generatedPassword }</Text>
             </View>
+
+
+
 
             {/* Modal */}
             <Modal visible={modalVisible} animationType="slide" transparent={true}>
@@ -194,96 +179,98 @@ const CreatePassword = () => {
                 </View>
                 </View>
             </Modal>
-
-        </View>
+        </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
+    // Your existing styles
     container: {
         alignItems: 'center',
+        padding: 20, // You might want to add some padding
+        paddingBottom: 100
     },
     h1: {
-        fontWeight: 'bold',
-        fontSize: 30
-    },
-    h2: {
-        fontWeight: 'bold',
-        fontSize: 26,
-        color: 'rgba(0, 0, 0, 0.4)', // Blue with 70% opacity
-        marginTop: '5%'
-    },
-    label: {
-        fontSize: 16,
-        marginBottom: '10%',
-    },
-    value: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: '20%',
-    },
-    slider: {
-        width: '80%',
-    },
-    passwordLengthLabel: {
-        marginTop: '15%'
-    },
-    numberButtons: {
-        flexDirection: 'row', // Display the text elements in a row
-        justifyContent: 'space-between', // Distribute space between the text elements
-        padding: '3%',
-        width: '60%',
-    },
-    labelsNumbers: {
-        marginTop: '4%'
-    },
-    generateSafeButtons: {
-        flexDirection: 'row', // Display the text elements in a row
-        justifyContent: 'space-between', // Distribute space between the text elements
-        padding: '5%',
-        width: '60%',
-    },
-    generatedPasswordView: {
-        marginTop: '7%',
-        backgroundColor: 'rgba(0, 0, 0, 1)',
-        width: '100%',
-        justifyContent: 'center', // Center vertically
-        alignItems: 'center', // Center horizontally
-        minHeight: '12%'
-    },
-    passwordText: {
-        color: 'rgba(255, 255, 255, 1)',
-    },
-    modalContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-      },
-      modalContent: {
-        backgroundColor: 'white',
-        padding: 20,
-        borderRadius: 10,
-      },
-      modalTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 10,
-      },
-      modalLabel: {
-        fontSize: 16,
-        marginBottom: 5,
-      },
-      modalInput: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 5,
-        padding: 8,
-        marginBottom: 10,
-      },
-      modalButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-      },
-});
+         fontWeight: 'bold',
+         fontSize: 30
+     },
+     h2: {
+         fontWeight: 'bold',
+         fontSize: 26,
+         color: 'rgba(0, 0, 0, 0.4)', // Blue with 70% opacity
+         marginTop: '5%'
+     },
+     label: {
+         fontSize: 16,
+         marginBottom: '10%',
+     },
+     value: {
+         fontSize: 20,
+         fontWeight: 'bold',
+         marginBottom: '20%',
+     },
+     slider: {
+         width: '80%',
+     },
+     passwordLengthLabel: {
+         marginTop: '15%'
+     },
+     numberButtons: {
+         flexDirection: 'row', // Display the text elements in a row
+         justifyContent: 'space-between', // Distribute space between the text elements
+         padding: '3%',
+         width: '60%',
+     },
+     labelsNumbers: {
+         marginTop: '4%'
+     },
+     generateSafeButtons: {
+         flexDirection: 'row', // Display the text elements in a row
+         justifyContent: 'space-between', // Distribute space between the text elements
+         padding: '5%',
+         width: '60%',
+     },
+     generatedPasswordView: {
+         marginTop: '7%',
+         backgroundColor: 'rgba(0, 0, 0, 1)',
+         width: '100%',
+         justifyContent: 'center', // Center vertically
+         alignItems: 'center', // Center horizontally
+         minHeight: '12%'
+     },
+     passwordText: {
+         color: 'rgba(255, 255, 255, 1)',
+     },
+     modalContainer: {
+         flex: 1,
+         justifyContent: 'center',
+         alignItems: 'center',
+       },
+       modalContent: {
+         backgroundColor: 'white',
+         padding: 20,
+         borderRadius: 10,
+       },
+       modalTitle: {
+         fontSize: 18,
+         fontWeight: 'bold',
+         marginBottom: 10,
+       },
+       modalLabel: {
+         fontSize: 16,
+         marginBottom: 5,
+       },
+       modalInput: {
+         borderWidth: 1,
+         borderColor: '#ccc',
+         borderRadius: 5,
+         padding: 8,
+         marginBottom: 10,
+       },
+       modalButtons: {
+         flexDirection: 'row',
+         justifyContent: 'space-around',
+       },
+ });
 
 export default CreatePassword;

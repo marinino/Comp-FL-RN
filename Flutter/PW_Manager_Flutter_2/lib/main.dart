@@ -113,7 +113,6 @@ class ListProvider extends ChangeNotifier {
     // Add more items as needed
   ];
 
-
   void addItem(AlphabeticalListItem newItem) {
     listItems.add(newItem);
     notifyListeners();
