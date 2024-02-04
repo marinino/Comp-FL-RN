@@ -1,3 +1,6 @@
+import 'dart:ffi';
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'top_home.dart';
@@ -194,7 +197,7 @@ class _SecondScreenState extends State<SecondScreen> {
     final capitalLetters = List.generate(_capsValue, (_) => String.fromCharCode(rand.nextInt(26) + 65));
 
     // Define symbols
-    final symbols = r"!@#$%^&*()_-+=[]{}|;:,.<>?";
+    const symbols = r"!@#$%^&*()_-+=[]{}|;:,.<>?";
 
     // Generate symbols
     final symbolList = List.generate(_symbolsValue, (_) => symbols[rand.nextInt(symbols.length)]);
@@ -207,7 +210,11 @@ class _SecondScreenState extends State<SecondScreen> {
     final remainingLength = _passwordLength.round() - characters.length;
     final remainingCharacters = List.generate(remainingLength, (_) => String.fromCharCode(rand.nextInt(26) + 97));
 
-    return characters.join() + remainingCharacters.join();
+    final passwordAsArray = (characters.join() + remainingCharacters.join()).split('');
+    passwordAsArray.shuffle();
+
+    return passwordAsArray.join();
+
   }
 
   void openPopUpToSavePassword(){
@@ -218,20 +225,22 @@ class _SecondScreenState extends State<SecondScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Popup with Text Input'),
+          title: const Text('Enter further'),
           content: Column(
             children: [
-              Text('Enter something:'),
+              const Text('Enter application:'),
               TextField(
                 controller: applicationInput,
                 decoration: InputDecoration(
-                  hintText: 'Type here...',
+                  hintText: 'Application name...',
                 ),
               ),
+              SizedBox(height: 30.0),
+              const Text('Enter E-Mail:'),
               TextField(
                 controller: eMailInput,
                 decoration: InputDecoration(
-                  hintText: 'Type here...',
+                  hintText: 'E-Mail adress...',
                 ),
               ),
             ],
