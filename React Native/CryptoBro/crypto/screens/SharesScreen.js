@@ -22,7 +22,7 @@ export default function SharesScreen(){
         {label: 'Dash', value: 'dash'},
         {label: 'Stellar', value: 'stellar'},
     ]);
-    const [dataValues, setDataValues] = useState([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,])
+    const [dataValues, setDataValues] = useState(new Array(50).fill(0))
     const [currentTrend, setCurrentTrend] = useState('')
 
     //const [data, setData] = useState([]);
@@ -52,7 +52,7 @@ export default function SharesScreen(){
             setDataValues(dataStellar)
             getCurrentTrend(dataStellar);
         } else {
-            setDataValues([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+            setDataValues(new Array(50).fill(0))
         }
 
         

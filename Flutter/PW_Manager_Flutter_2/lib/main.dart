@@ -105,11 +105,11 @@ class HomeScreen extends StatelessWidget {
 class ListProvider extends ChangeNotifier {
 
   List<AlphabeticalListItem> listItems = [
-    AlphabeticalListItem(application: 'Apple', email: 'Subtitle A', password: '123456'),
-    AlphabeticalListItem(application: 'Banana', email: 'Subtitle B', password: '123456'),
-    AlphabeticalListItem(application: 'Avocado', email: 'Subtitle A', password: '123456'),
-    AlphabeticalListItem(application: 'Grapes', email: 'Subtitle G', password: '123456'),
-    AlphabeticalListItem(application: 'Orange', email: 'Subtitle O', password: '123456'),
+    AlphabeticalListItem(application: 'Apple', email: 'example1@mail.com', password: '123456'),
+    AlphabeticalListItem(application: 'Banana', email: 'example2@mail.com', password: '123456'),
+    AlphabeticalListItem(application: 'Avocado', email: 'example3@mail.com', password: '123456'),
+    AlphabeticalListItem(application: 'Grapes', email: 'example4@mail.com', password: '123456'),
+    AlphabeticalListItem(application: 'Orange', email: 'example5@mail.com', password: '123456'),
     // Add more items as needed
   ];
 

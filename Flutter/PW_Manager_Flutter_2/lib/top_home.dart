@@ -20,7 +20,7 @@ class TopSection extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                'x \n Passwords',
+                '10 \n Passwords',
                 style: TextStyle(
                   fontSize: 20.0,
                   color: theme.colorScheme.onSecondary,
@@ -30,7 +30,7 @@ class TopSection extends StatelessWidget {
             const SizedBox(width: 16.0),
             Expanded(
               child: Text(
-                'y \n Strong',
+                '3 \n Strong',
                 style: TextStyle(
                   fontSize: 16.0,
                   color: theme.colorScheme.onSecondary,
@@ -40,7 +40,7 @@ class TopSection extends StatelessWidget {
             const SizedBox(width: 16.0),
             Expanded(
               child: Text(
-                'z \n Mediocre',
+                '2 \n Mediocre',
                 style: TextStyle(
                   fontSize: 16.0,
                   color: theme.colorScheme.onSecondary,
@@ -81,7 +81,7 @@ class AlphabeticalList extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Password von ' + application),
+            title: Text('Password of ' + application),
             content: Text(password),
             actions: [
               TextButton(
