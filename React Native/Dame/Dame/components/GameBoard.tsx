@@ -3,7 +3,6 @@ import { StyleSheet, FlatList, TouchableOpacity, View, Text } from 'react-native
 import DameGame from './DameGame'; // Pfad zu Ihrer DameGame-Klasse
 
 const GameBoard = () => {
-
     const [game, setGame] = useState(() => new DameGame());
 
     const [updateCounter, setUpdateCounter] = useState(0);
@@ -18,9 +17,6 @@ const GameBoard = () => {
       // game.movePiece(startRow, startCol, row, col);
       game.handlePressDeep(row, column)
 
-
-
-
       // Aktualisieren Sie den Zustand, um die UI neu zu rendern
       setGame(game)
       forceUpdate(); // Dies wird die Komponente dazu bringen, sich neu zu rendern
@@ -28,25 +24,25 @@ const GameBoard = () => {
 
   const boardSize = 10;
   const squares = Array.from({ length: boardSize * boardSize }, (_, index) => {
-    const row = Math.floor(index / boardSize);
-    const col = index % boardSize;
-    const isDark = (row + col) % 2 === 1;
-    let hasPiece = false;
-    let pieceColor = 'transparent';
+  const row = Math.floor(index / boardSize);
+  const col = index % boardSize;
+  const isDark = (row + col) % 2 === 1;
+  let hasPiece = false;
+  let pieceColor = 'transparent';
 
-    // Platzieren von Damesteinen in den ersten 4 und letzten 4 Reihen auf dunklen Feldern
-    if (isDark && (row < 4 || row >= 6)) {
-      hasPiece = true;
-      pieceColor = row < 4 ? 'white' : 'black'; // Weiße Steine für Spieler 1, schwarze für Spieler 2
-    }
+  // Platzieren von Damesteinen in den ersten 4 und letzten 4 Reihen auf dunklen Feldern
+  if (isDark && (row < 4 || row >= 6)) {
+    hasPiece = true;
+    pieceColor = row < 4 ? 'white' : 'black'; // Weiße Steine für Spieler 1, schwarze für Spieler 2
+  }
 
-    return {
-      id: index,
-      isDark,
-      hasPiece,
-      pieceColor,
-    };
-  });
+  return {
+    id: index,
+    isDark,
+    hasPiece,
+    pieceColor,
+  };
+});
 
   const renderSquare = ({ item }) => {
     const row = Math.floor(item.id / game.boardSize);
