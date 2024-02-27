@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <profileable android:shell="true"/>
     <application
         android:label="dame"
         android:name="${applicationName}"

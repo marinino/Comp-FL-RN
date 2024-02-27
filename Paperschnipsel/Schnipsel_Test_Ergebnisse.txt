@@ -1,0 +1,9 @@
+- Flutter auf IOS besser
+- Bei React Native sind die console logs sehr ins Gewicht gefallen, von Spitzen 40 runter auf 30
+- Spitzen bei Flutter vielleicht 15
+- RAM ungefähr doppelt so hoch bei React Native(150 MB) zu Flutter(70 MB)
+- Pattern bei CPU, erster click leichte Erhöhung, zweiter Click massiver peak
+- RAM leicht steigend konstant
+
+loakler speicher shared preferences
+computer gegner für dame

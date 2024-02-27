@@ -1,0 +1,6 @@
+"Class","Library","Total Instances","Total Size","Total Dart Heap Size","Total External Size","New Space Instances","New Space Size","New Space Dart Heap Size","New Space External Size","Old Space Instances","Old Space Size","Old Space Dart Heap Size","Old Space External Size"
+GamePiece,package:dame/models/game_piece.dart,40,640,640,0,0,0,0,0,40,640,640,0
+_DameBoardState,package:dame/main.dart,1,40,40,0,0,0,0,0,1,40,40,0
+DameGame,package:dame/models/dame_game.dart,1,24,24,0,0,0,0,0,1,24,24,0
+DameBoard,package:dame/main.dart,1,16,16,0,0,0,0,0,1,16,16,0
+MyApp,package:dame/main.dart,1,16,16,0,0,0,0,0,1,16,16,0
