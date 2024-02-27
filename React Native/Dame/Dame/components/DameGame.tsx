@@ -24,55 +24,56 @@ export default class DameGame {
   }
 
   movePiece(startRow, startCol, endRow, endCol) {
-    // Hier könnten Sie die Logik zum Bewegen der Spielsteine implementieren
-    // einschließlich der Überprüfung auf gültige Züge und das Schlagen gegnerischer Steine
+      // Hier könnten Sie die Logik zum Bewegen der Spielsteine implementieren
+      // einschließlich der Überprüfung auf gültige Züge und das Schlagen gegnerischer Steine
 
-    console.log('Called move');
+      // Prüfen Sie, ob der Zug gültig ist
+      if (!this.isValidMove(startCol, startRow, endCol, endRow)) {
+        return false;
+      }
 
-    // Prüfen Sie, ob der Zug gültig ist
-    if (!this.isValidMove(startCol, startRow, endCol, endRow)) {
-      return false;
+      const beatenPiece: GamePiece | null = this.checkAndRemoveOppBeaten(startCol, startRow, endCol, endRow, true);
+      var foundBeatingMove = this.findMovesWhichBeat().getPiece()
+      if (beatenPiece == null && foundBeatingMove) {
+        this.stateString = `Spieler ${this.currentPlayer} hat die Schlagpflicht verletzt, wähle einen anderen Zug`;
+        return false;
+      }
+
+      // Beispiel für das Bewegen eines Spielsteins
+      const piece = this.board[startRow][startCol];
+      this.board[endRow][endCol] = piece;
+      this.board[startRow][startCol] = null;
+
+
+      const beatenPieceAfterMove: GamePiece | null = this.checkAndRemoveOppBeaten(startCol, startRow, endCol, endRow, false);
+
+
+      const newQueen: boolean = this.checkForQueenConv();
+
+
+      // Ändert den Spieler, wenn kein weiterer Schlag möglich ist oder es keinen Schlag gab
+      if (beatenPieceAfterMove != null && this.findMovesWhichBeat().getPiece() && !newQueen) {
+        this.stateString = `Spieler ${this.currentPlayer} bleibt dran`;
+      } else {
+        this.currentPlayer = 3 - this.currentPlayer;
+        this.stateString = `Spieler ${this.currentPlayer} ist dran`;
+      }
+
+
+      if (this.checkWin()) {
+        this.stateString = `Spieler ${3 - this.currentPlayer} hat gewonnen`;
+        setTimeout(() => {
+          this.resetGame();
+        }, 5000);
+      }
+
+
+      if(this.currentPlayer == 2){
+          this.simulateComputerMove();
+      }
+
+      return true;
     }
-
-    const beatenPiece: GamePiece | null = this.checkAndRemoveOppBeaten(startCol, startRow, endCol, endRow, true);
-    var foundBeatingMove = this.findMovesWhichBeat()
-    if (beatenPiece == null && foundBeatingMove) {
-      this.stateString = `Spieler ${this.currentPlayer} hat die Schlagpflicht verletzt, wähle einen anderen Zug`;
-      return false;
-    }
-
-    // Beispiel für das Bewegen eines Spielsteins
-    const piece = this.board[startRow][startCol];
-    console.log(piece, endRow, endCol)
-    this.board[endRow][endCol] = piece;
-    console.log(this.board[endRow][endCol])
-    this.board[startRow][startCol] = null;
-    console.log(this.board[startRow][startCol])
-
-    console.log(this.board)
-
-    const beatenPieceAfterMove: GamePiece | null = this.checkAndRemoveOppBeaten(startCol, startRow, endCol, endRow, false);
-
-    console.log(this.board);
-    const newQueen: boolean = this.checkForQueenConv();
-
-    // Ändert den Spieler, wenn kein weiterer Schlag möglich ist oder es keinen Schlag gab
-    if (beatenPieceAfterMove != null && this.findMovesWhichBeat() && !newQueen) {
-      this.stateString = `Spieler ${this.currentPlayer} bleibt dran`;
-    } else {
-      this.currentPlayer = 3 - this.currentPlayer;
-      this.stateString = `Spieler ${this.currentPlayer} ist dran`;
-    }
-
-    if (this.checkWin()) {
-      this.stateString = `Spieler ${3 - this.currentPlayer} hat gewonnen`;
-      setTimeout(() => {
-        this.resetGame();
-      }, 5000);
-    }
-
-    return true;
-  }
 
   handlePressDeep(row, column){
     if(this.selectedX == -1){
@@ -297,129 +298,122 @@ export default class DameGame {
         return false;
       }
 
-  findMovesWhichBeat(): GamePiece? {
+  findMovesWhichBeat(): Move {
 
-    var returnPiece = null;
-    // Überprüfen, ob eine Eliminierung möglich ist
-      for(elementRow of this.board){
-        for(elementItem of elementRow){
-          if (elementItem !== null && elementItem.playerId === this.currentPlayer) {
-            const rowIndex = this.board.indexOf(elementRow);
-            const itemIndex = elementRow.indexOf(elementItem);
-            console.log(rowIndex, itemIndex)
+      var returnMove = new Move(null, -1, -1, -1, -1);
+      // Überprüfen, ob eine Eliminierung möglich ist
+        for(elementRow of this.board){
+          for(elementItem of elementRow){
+            if (elementItem && elementItem.playerId === this.currentPlayer) {
+              const rowIndex = this.board.indexOf(elementRow);
+              const itemIndex = elementRow.indexOf(elementItem);
 
-            if(!this.board[rowIndex][itemIndex].isQueen){
-              // Teste verschiedene Richtungen
-              console.log('WHERE YOU GO 1')
+              if(!this.board[rowIndex][itemIndex].isQueen){
+                // Teste verschiedene Richtungen
 
-              if (rowIndex + 2 < 10 && itemIndex + 2 < 10) {
-                if (this.isValidMove(itemIndex, rowIndex, itemIndex + 2, rowIndex + 2)) {
+                if (rowIndex + 2 < 10 && itemIndex + 2 < 10) {
+                  if (this.isValidMove(itemIndex, rowIndex, itemIndex + 2, rowIndex + 2)) {
 
-                    var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex + 2, rowIndex + 2, true)
-                    var returnedPiece = checkToChangeReturningPiece(returnPiece, tempPiece);
+                      var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex + 2, rowIndex + 2, true)
+                      var returnedPiece = this.checkToChangeReturningPiece(returnMove.getPiece(), tempPiece);
+                      if(returnedPiece != null && returnedPiece.isQueen){
+                        return new Move(returnedPiece, itemIndex + 2, rowIndex + 2, itemIndex, rowIndex);
+                      } else if(returnedPiece != null){
+                        returnMove = new Move(returnedPiece, itemIndex + 2, rowIndex + 2, itemIndex, rowIndex);
+                      }
+                  }
+                }
+
+                if (rowIndex + 2 < 10 && itemIndex - 2 >= 0) {
+                  if (this.isValidMove(itemIndex, rowIndex, itemIndex - 2, rowIndex + 2)) {
+                     var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex - 2, rowIndex + 2, true)
+                     var returnedPiece = this.checkToChangeReturningPiece(returnMove.getPiece(), tempPiece);
+                     if(returnedPiece != null && returnedPiece.isQueen){
+                         return new Move(returnedPiece, itemIndex - 2, rowIndex + 2, itemIndex, rowIndex);
+                     } else if(returnedPiece != null){
+                         returnMove = new Move(returnedPiece, itemIndex - 2, rowIndex + 2, itemIndex, rowIndex);
+                     }
+                  }
+                }
+                if (rowIndex - 2 >= 0 && itemIndex - 2 >= 0) {
+                  if (this.isValidMove(itemIndex, rowIndex, itemIndex - 2, rowIndex - 2)) {
+                    var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex - 2, rowIndex - 2, true)
+                    var returnedPiece = this.checkToChangeReturningPiece(returnMove.getPiece(), tempPiece);
                     if(returnedPiece != null && returnedPiece.isQueen){
-                      return returnedPiece;
+                      return new Move(returnedPiece, itemIndex - 2, rowIndex - 2, itemIndex, rowIndex);
                     } else if(returnedPiece != null){
-                      returnPiece = returnedPiece;
+                      returnMove = new Move(returnedPiece, itemIndex - 2, rowIndex - 2, itemIndex, rowIndex);
                     }
-
-                }
-              }
-              console.log('WHERE YOU GO 2')
-
-              if (rowIndex + 2 < 10 && itemIndex - 2 >= 0) {
-                if (this.isValidMove(itemIndex, rowIndex, itemIndex - 2, rowIndex + 2)) {
-                   var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex - 2, rowIndex + 2, true)
-                   var returnedPiece = checkToChangeReturningPiece(returnPiece, tempPiece);
-                   if(returnedPiece != null && returnedPiece.isQueen){
-                       return returnedPiece;
-                   } else if(returnedPiece != null){
-                       returnPiece = returnedPiece;
-                   }
-                }
-              }
-              console.log('WHERE YOU GO 3')
-              if (rowIndex - 2 >= 0 && itemIndex - 2 >= 0) {
-                if (this.isValidMove(itemIndex, rowIndex, itemIndex - 2, rowIndex - 2)) {
-                  var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex - 2, rowIndex - 2, true)
-                  var returnedPiece = checkToChangeReturningPiece(returnPiece, tempPiece);
-                  if(returnedPiece != null && returnedPiece.isQueen){
-                    return returnedPiece;
-                  } else if(returnedPiece != null){
-                    returnPiece = returnedPiece;
                   }
                 }
-              }
-              console.log('BEFORE LOWER LEFT' , rowIndex, itemIndex)
-              if (rowIndex - 2 >= 0 && itemIndex + 2 < 10) {
-                console.log('GONE HERE')
-                if (this.isValidMove(itemIndex, rowIndex, itemIndex + 2, rowIndex - 2)) {
-                  var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex + 2, rowIndex - 2, true)
-                  var returnedPiece = checkToChangeReturningPiece(returnPiece, tempPiece);
-                  if(returnedPiece != null && returnedPiece.isQueen){
-                    return returnedPiece;
-                  } else if(returnedPiece != null){
-                    returnPiece = returnedPiece;
+                if (rowIndex - 2 >= 0 && itemIndex + 2 < 10) {
+                  if (this.isValidMove(itemIndex, rowIndex, itemIndex + 2, rowIndex - 2)) {
+                    var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex + 2, rowIndex - 2, true)
+                    var returnedPiece = this.checkToChangeReturningPiece(returnMove.getPiece(), tempPiece);
+                    if(returnedPiece != null && returnedPiece.isQueen){
+                      return new Move(returnedPiece, itemIndex + 2, rowIndex - 2, itemIndex, rowIndex);
+                    } else if(returnedPiece != null){
+                      returnMove = new Move(returnedPiece, itemIndex + 2, rowIndex - 2, itemIndex, rowIndex);
+                    }
                   }
                 }
+
+              } else {
+                  for(var i = 2; i < 10; i++){
+                      if((rowIndex + i) < 10 && (itemIndex + i) < 10 && !returnMove.getPiece()){
+                          if (this.isValidMove(itemIndex, rowIndex, itemIndex + i, rowIndex + i)) {
+                            var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex + i, rowIndex + i, true)
+                            var returnedPiece = this.checkToChangeReturningPiece(returnMove.getPiece(), tempPiece);
+                            if(returnedPiece != null && returnedPiece.isQueen){
+                              return new Move(returnedPiece, itemIndex + i, rowIndex + i, itemIndex, rowIndex);
+                            } else if(returnedPiece != null){
+                              returnMove = new Move(returnedPiece, itemIndex + i, rowIndex + i, itemIndex, rowIndex);
+                            }
+                          }
+                      }
+                      if((rowIndex - i) >= 0 && (itemIndex - i) >= 0 && !returnMove.getPiece()){
+                          if (this.isValidMove(itemIndex, rowIndex, itemIndex - i, rowIndex - i)) {
+                            var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex - i, rowIndex - i, true)
+                            var returnedPiece = this.checkToChangeReturningPiece(returnMove.getPiece(), tempPiece);
+                            if(returnedPiece != null && returnedPiece.isQueen){
+                              return new Move(returnedPiece, itemIndex - i, rowIndex - i, itemIndex, rowIndex);
+                            } else if(returnedPiece != null){
+                              returnMove = new Move(returnedPiece, itemIndex - i, rowIndex - i, itemIndex, rowIndex);
+                            }
+                          }
+                      }
+
+                      if((rowIndex - i) >= 0 && (itemIndex + i) < 10 && !returnMove.getPiece()){
+                          if (this.isValidMove(itemIndex, rowIndex, itemIndex + i, rowIndex - i)) {
+                            var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex + i, rowIndex - i, true)
+                            var returnedPiece = this.checkToChangeReturningPiece(returnMove.getPiece(), tempPiece);
+                            if(returnedPiece != null && returnedPiece.isQueen){
+                              return new Move(returnedPiece, itemIndex + i, rowIndex - i, itemIndex, rowIndex);
+                            } else if(returnedPiece != null){
+                              returnMove = new Move(returnedPiece, itemIndex + i, rowIndex - i, itemIndex, rowIndex);
+                            }
+                          }
+                      }
+
+                      if((rowIndex + i) < 10 && (itemIndex - i) >= 0 && !returnMove.getPiece()){
+                          if (this.isValidMove(itemIndex, rowIndex, itemIndex - i, rowIndex + i)) {
+                            var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex - i, rowIndex + i, true)
+                            var returnedPiece = this.checkToChangeReturningPiece(returnMove.getPiece(), tempPiece);
+                            if(returnedPiece != null && returnedPiece.isQueen){
+                              return new Move(returnedPiece, itemIndex - i, rowIndex + i, itemIndex, rowIndex);
+                            } else if(returnedPiece != null){
+                              returnMove = new Move(returnedPiece, itemIndex - i, rowIndex + i, itemIndex, rowIndex);
+                            }
+                          }
+                      }
+                  }
               }
-
-            } else {
-                for(var i = 2; i < 10; i++){
-                    if((rowIndex + i) < 10 && (itemIndex + i) < 10 && !returnBool){
-                        if (this.isValidMove(itemIndex, rowIndex, itemIndex + i, rowIndex + i)) {
-                          var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex + i, rowIndex + i, true)
-                          var returnedPiece = checkToChangeReturningPiece(returnPiece, tempPiece);
-                          if(returnedPiece != null && returnedPiece.isQueen){
-                            return returnedPiece;
-                          } else if(returnedPiece != null){
-                            returnPiece = returnedPiece;
-                          }
-                        }
-                    }
-
-                    if((rowIndex - i) >= 0 && (itemIndex - i) >= 0 && !returnBool){
-                        if (this.isValidMove(itemIndex, rowIndex, itemIndex - i, rowIndex - i)) {
-                          var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex - i, rowIndex - i, true)
-                          var returnedPiece = checkToChangeReturningPiece(returnPiece, tempPiece);
-                          if(returnedPiece != null && returnedPiece.isQueen){
-                            return returnedPiece;
-                          } else if(returnedPiece != null){
-                            returnPiece = returnedPiece;
-                          }
-                        }
-                    }
-
-                    if((rowIndex - i) >= 0 && (itemIndex + i) < 10 && !returnBool){
-                        if (this.isValidMove(itemIndex, rowIndex, itemIndex + i, rowIndex - i)) {
-                          var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex + i, rowIndex - i, true)
-                          var returnedPiece = checkToChangeReturningPiece(returnPiece, tempPiece);
-                          if(returnedPiece != null && returnedPiece.isQueen){
-                            return returnedPiece;
-                          } else if(returnedPiece != null){
-                            returnPiece = returnedPiece;
-                          }
-                        }
-                    }
-
-                    if((rowIndex + i) < 10 && (itemIndex - i) >= 0 && !returnBool){
-                        if (this.isValidMove(itemIndex, rowIndex, itemIndex - i, rowIndex + i)) {
-                          var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex - i, rowIndex + i, true)
-                          var returnedPiece = checkToChangeReturningPiece(returnPiece, tempPiece);
-                          if(returnedPiece != null && returnedPiece.isQueen){
-                            return returnedPiece;
-                          } else if(returnedPiece != null){
-                            returnPiece = returnedPiece;
-                          }
-                        }
-                    }
-                }
             }
           }
         }
-      }
-      return returnBool;
-  };
+        return returnMove;
+    };
+
 
        resetGame(): void {
            this.board = Array.from({ length: 10 }, () => Array(10).fill(null));
@@ -444,7 +438,7 @@ export default class DameGame {
            // ...
        }
 
-    checkToChangeReturningPiece(returnPiece, tempPiece): GamePiece? {
+    checkToChangeReturningPiece(returnPiece, tempPiece): GamePiece | null {
         if (returnPiece == null) {
           return tempPiece;
         } else if(!returnPiece.isQueen && tempPiece != null){
@@ -454,4 +448,113 @@ export default class DameGame {
         }
       }
   // Weitere Methoden wie Überprüfung auf gültige Züge, Überprüfung der Gewinnbedingungen usw.
+
+  simulateComputerMove(): void {
+          // Find moves which beat mit jedem Stein
+          for(const row in this.board){
+              for(const piece in this.board[row]){
+                  // finds 'ideal' piece to move, returns null if no piece beats
+                  const optimalMove = this.findMovesWhichBeat();
+                  // Makes ideal move if possible
+                  if(optimalMove.getPiece() != null){
+                      this.movePiece(optimalMove.getStartY(), optimalMove.getStartX(), optimalMove.getEndY(), optimalMove.getEndX())
+                      return;
+                  }
+
+
+                  // Makes random move which is not made from baseline
+                  // Make move away from potential danger
+                  for(var i = 0; i <= 8; i++){
+                      for(var j = 0; j <= 9; j++){
+                          if(this.board[i][j] && this.board[i][j].playerId == 2){
+                              if(i-1 >= 0 && j+1 <= 9 && !this.board[i-1][j+1] &&
+                                      (!this.board[i-2][j] || this.board[i-2][j].playerId == 2) &&
+                                      (!this.board[i-2][j+2] || this.board[i-2][j+2].playerId == 2)){
+                                  this.movePiece(i, j, i-1, j+1)
+                                  return;
+                              } else if(i-1 >= 0 && j-1 >= 0 && !this.board[i-1][j-1] &&
+                                      (!this.board[i-2][j] || this.board[i-2][j].playerId == 2) &&
+                                      (!this.board[i-2][j-2] || this.board[i-2][j-2].playerId == 2)){
+                                  this.movePiece(i, j, i-1, j-1)
+                                  return;
+                              }
+                          }
+                      }
+                  }
+
+                  // Makes random move which is not made from baseline
+                  for(var i = 0; i <= 8; i++){
+                      for(var j = 0; j <= 9; j++){
+                          if(this.board[i][j] && this.board[i][j].playerId == 2){
+                              if(i-1 >= 0 && j+1 <= 9 && !this.board[i-1][j+1]){
+                                  this.movePiece(i, j, i-1, j+1)
+                                  return;
+                              } else if(i-1 >= 0 && j-1 >= 0 && !this.board[i-1][j-1]){
+                                  this.movePiece(i, j, i-1, j-1)
+                                  return;
+                              }
+                          }
+                      }
+                  }
+
+                  // Make move from baseline
+                  var startY = 9
+                  for(var i = 0; i <= 9; i++){
+                      if(this.board[9][i] && this.board[9][i].playerId == 2){
+                          if(i+1 <= 9 && !this.board[8][i+1]){
+                              this.movePiece(9, i, 8, i+1)
+                              return;
+                          } else if(i+1 >= 0 && !this.board[8][i-1]){
+                              this.movePiece(9, i, 8, i-1)
+                              return;
+                          }
+                      }
+                  }
+                  // Make random queen move
+              }
+          }
+          // Make the move
+          // Change the player, whcih actually already when executing move i guess
+      
+    // Weitere Methoden wie Überprüfung auf gültige Züge, Überprüfung der Gewinnbedingungen usw.
+  }
+
+}
+
+
+class Move{
+
+    piece: GamePiece
+    endX: number
+    endY: number
+    startX: number
+    startY: number
+
+    constructor(piece: GamePiece, endX: number, endY: number, startX: number, startY: number){
+        this.piece = piece
+        this.endX = endX
+        this.endY = endY
+        this.startY = startY
+        this.startX = startX
+    }
+
+    getPiece(): GamePiece {
+        return this.piece
+    }
+
+    getEndX(): number {
+        return this.endX
+    }
+
+    getEndY(): number {
+        return this.endY
+    }
+
+    getStartX(): number {
+        return this.startX
+    }
+
+    getStartY(): number {
+        return this.startY
+    }
 }

@@ -1,0 +1,7 @@
+- Große Projekte Flutter und React Native
+- Entwicklung von Flutter und React Native
+- Community Vergleich
+- Ziel des Vergleichs
+- Methodik
+	- Wie wurde getestet
+	- Was wurde getestet
