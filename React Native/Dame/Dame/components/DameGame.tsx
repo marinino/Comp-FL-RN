@@ -9,14 +9,18 @@ export default class DameGame {
     this.board = Array.from({ length: this.boardSize }, () => Array(this.boardSize).fill(null));
     this.currentPlayer = 1; // 1 für Spieler 1, 2 für Spieler 2
 
+    this.board[1][0] = new GamePiece(1, true)
+    this.board[1][2] = new GamePiece(2, true)
+
+
     // Initialisieren des Bretts mit Spielsteinen
     for (let row = 0; row < this.boardSize; row++) {
       for (let col = 0; col < this.boardSize; col++) {
         if ((row + col) % 2 === 1) {
           if (row < 4) {
-            this.board[row][col] = new GamePiece(1, false);
+            //this.board[row][col] = new GamePiece(1, false);
           } else if (row >= 6) {
-            this.board[row][col] = new GamePiece(2, false);
+            //this.board[row][col] = new GamePiece(2, false);
           }
         }
       }
@@ -77,7 +81,6 @@ export default class DameGame {
 
   handlePressDeep(row, column){
     if(this.selectedX == -1){
-        console.log(row, column)
         if(this.board[row][column]?.playerId != this.currentPlayer){
           return;
         }
@@ -149,6 +152,10 @@ export default class DameGame {
     isValidMove(startX: number, startY: number, endX: number, endY: number): boolean {
         // ... Ihre Logik, um zu prüfen, ob ein Zug gültig ist ...
 
+        if(startX < 0 || startX > 9 ||startY < 0 || startY > 9 || endX < 0 || endX > 9 ||endY < 0 || endY > 9){
+            return false
+        }
+
         let jumpedOwnPiecesOrAir = false;
         const jumpedFields: number[][] = this.getJumpedFields(startX, startY, endX, endY);
 
@@ -215,7 +222,6 @@ export default class DameGame {
           var foundOwnPiece = false;
 
           jumpedFields.forEach((element) => {
-            console.log(element[1], element[0], this.board[element[1]][element[0]])
             if(this.board[element[1]][element[0]]?.playerId == (3 - this.currentPlayer)){
               counterOfOpponentPieces++;
             }
@@ -266,8 +272,6 @@ export default class DameGame {
           })
         })
 
-        console.log(`FOUND BLACK ${foundBlack}`);
-        console.log(`FOUND WHITE ${foundWhite}`);
 
         if (!(foundBlack && foundWhite)) {
           console.log('GAME OVER, SOMEBODY WON');
@@ -461,20 +465,30 @@ export default class DameGame {
                       return;
                   }
 
+                  // Create crowned piece if possible
+                  for(var i = 0; i <= 9; i++){
+                    if(this.board[1][i] && this.board[1][i].playerId == 2 && i-1 >= 0 && !this.board[0][i-1] && !this.board[1][i].isQueen){
+                        this.movePiece(1, i, 0, i-1)
+                        return;
+                    } else if(this.board[1][i] && this.board[1][i].playerId == 2 && i+1 <= 9 && !this.board[0][i+1] && !this.board[1][i].isQueen){
+                        this.movePiece(1, i, 0, i+1)
+                        return;
+                    }
+                  }
 
                   // Makes random move which is not made from baseline
                   // Make move away from potential danger
                   for(var i = 0; i <= 8; i++){
                       for(var j = 0; j <= 9; j++){
-                          if(this.board[i][j] && this.board[i][j].playerId == 2){
+                          if(this.board[i][j] && this.board[i][j].playerId == 2 && !this.board[i][j].isQueen){
                               if(i-1 >= 0 && j+1 <= 9 && !this.board[i-1][j+1] &&
-                                      (!this.board[i-2][j] || this.board[i-2][j].playerId == 2) &&
-                                      (!this.board[i-2][j+2] || this.board[i-2][j+2].playerId == 2)){
+                                      (i-2 >= 0 && (!this.board[i-2][j] || this.board[i-2][j].playerId == 2)) &&
+                                      (i-2 >= 0 && j+2 <= 9 && (!this.board[i-2][j+2] || this.board[i-2][j+2].playerId == 2))){
                                   this.movePiece(i, j, i-1, j+1)
                                   return;
                               } else if(i-1 >= 0 && j-1 >= 0 && !this.board[i-1][j-1] &&
-                                      (!this.board[i-2][j] || this.board[i-2][j].playerId == 2) &&
-                                      (!this.board[i-2][j-2] || this.board[i-2][j-2].playerId == 2)){
+                                      (i-2 >= 0 && (!this.board[i-2][j] || this.board[i-2][j].playerId == 2)) &&
+                                      (i-2 >= 0 && j-2 >= 0 && (!this.board[i-2][j-2] || this.board[i-2][j-2].playerId == 2))){
                                   this.movePiece(i, j, i-1, j-1)
                                   return;
                               }
@@ -485,13 +499,74 @@ export default class DameGame {
                   // Makes random move which is not made from baseline
                   for(var i = 0; i <= 8; i++){
                       for(var j = 0; j <= 9; j++){
-                          if(this.board[i][j] && this.board[i][j].playerId == 2){
+                          if(this.board[i][j] && this.board[i][j].playerId == 2 && !this.board[i][j].isQueen){
                               if(i-1 >= 0 && j+1 <= 9 && !this.board[i-1][j+1]){
                                   this.movePiece(i, j, i-1, j+1)
                                   return;
                               } else if(i-1 >= 0 && j-1 >= 0 && !this.board[i-1][j-1]){
                                   this.movePiece(i, j, i-1, j-1)
                                   return;
+                              }
+                          }
+                      }
+                  }
+
+                  // Makes random move with dame
+                  for(var i = 0; i <= 8; i++){
+                      for(var j = 0; j <= 9; j++){
+                          if(this.board[i][j] && this.board[i][j].playerId == 2 && this.board[i][j].isQueen){
+                              console.log('FOUND PC STONE AT: ', i, j)
+                              for(var k = 1; k <= 9; k++){
+
+                                      console.log('SURROUNDED BY DANGER!!!!!?????????? - +')
+                                      if(this.isValidMove(j, k, j+k, i-k) && !this.surroundedByDanger(i-k, j+k, i, j)){
+                                          console.log('TOP RIGHT LETS GO', i, j, i-k, j+k, 'THIS IS CURRENT K', k)
+                                          this.movePiece(i, j, i-k, j+k)
+                                          console.log('MOVE DUN DUN')
+                                          return;
+                                      }
+
+                                      console.log('SURROUNDED BY DANGER!!!!!?????????? - -')
+                                      if(this.isValidMove(j, k, j-k, i-k) && !this.surroundedByDanger(i-k, j-k, i, j)){
+                                          this.movePiece(i, j, i-k, j-k)
+                                          return;
+                                      }
+
+                                      console.log('SURROUNDED BY DANGER!!!!!?????????? + -')
+                                      if(this.isValidMove(j, k, j-k, i+k) && !this.surroundedByDanger(i+k, j-k, i, j)){
+                                          this.movePiece(i, j, i+k, j-k)
+                                          return;
+                                      }
+
+                                      console.log('SURROUNDED BY DANGER!!!!!?????????? + +')
+                                      if(this.isValidMove(j, k, j+k, i+k) && !this.surroundedByDanger(i+k, j+k, i, j)){
+                                          this.movePiece(i, j, i+k, j+k)
+                                          return;
+                                      }
+
+                              }
+                          }
+                      }
+                  }
+
+                  // Makes random move with dame
+                  for(var i = 0; i <= 8; i++){
+                      for(var j = 0; j <= 9; j++){
+                          if(this.board[i][j] && this.board[i][j].playerId == 2 && this.board[i][j].isQueen){
+                              for(var k = 1; i+k <= 9 || i-k >= 0 || j+k <= 9 || j-k >= 0; k++){
+                                  if(i-k >= 0 && j+k <= 9 && !this.board[i-k][j+k]){
+                                      this.movePiece(i, j, i-k, j+k)
+                                      return;
+                                  } else if(i-k >= 0 && j-k >= 0 && !this.board[i-k][j-k]){
+                                      this.movePiece(i, j, i-k, j-k)
+                                      return;
+                                  } else if(i+k <= 9 && j-k >= 0 && !this.board[i+k][j-k]){
+                                      this.movePiece(i, j, i+k, j-k)
+                                      return;
+                                  } else if(i+k <= 90 && j+k <= 9 && !this.board[i+k][j+k]){
+                                      this.movePiece(i, j, i+k, j+k)
+                                      return;
+                                  }
                               }
                           }
                       }
@@ -515,8 +590,110 @@ export default class DameGame {
           }
           // Make the move
           // Change the player, whcih actually already when executing move i guess
-      
+
     // Weitere Methoden wie Überprüfung auf gültige Züge, Überprüfung der Gewinnbedingungen usw.
+  }
+
+  surroundedByDanger(rowIndex: int, columnIndex: int, startRow: int, startColumn: int): boolean {
+
+    console.log(rowIndex, columnIndex, 'ALARM')
+
+    // Checks if piece is could be normally beaten
+    if(columnIndex + 1 <= 9 && rowIndex - 1 >= 0 && this.board[rowIndex - 1][columnIndex + 1] && this.board[rowIndex - 1][columnIndex + 1].playerId == (3-this.currentPlayer) && !this.board[rowIndex - 1][columnIndex + 1].isQueen &&
+            columnIndex - 1 >= 0 && rowIndex + 1 <= 9 && !this.board[rowIndex + 1][columnIndex - 1]){
+            console.log('WE HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        return true;
+
+    }else if(columnIndex - 1 >= 0 && rowIndex - 1 >= 0 && this.board[rowIndex - 1][columnIndex - 1] && this.board[rowIndex - 1][columnIndex - 1].playerId == (3-this.currentPlayer) && !this.board[rowIndex - 1][columnIndex - 1].isQueen &&
+            columnIndex + 1 <= 9 && rowIndex + 1 <= 9 && !this.board[rowIndex + 1][columnIndex + 1]){
+            console.log('WE HERE')
+        return true;
+    }
+
+    var pieceFoundUpLeft: bool = false
+    var pieceFoundUpRight: bool = false
+    var pieceFoundDownLeft: bool = false
+    var pieceFoundDownRight: bool = false
+    var maxIndex: int = -1
+    if(columnIndex > rowIndex){
+        maxIndex = columnIndex
+    } else {
+        maxIndex = rowIndex
+    }
+
+    for(var k = 1; k + maxIndex <= 9; k++){
+        console.log(k, 'BIG OL K', maxIndex)
+        if(0 <= rowIndex + k && rowIndex + k <= 9 && 0 <= columnIndex + k && columnIndex + k <= 9
+                && rowIndex + k != startRow && columnIndex + k != startColumn
+                && this.board[rowIndex + k][columnIndex + k]
+                && this.board[rowIndex + k][columnIndex + k].playerId == (3-this.currentPlayer)
+                && this.board[rowIndex + k][columnIndex + k].isQueen
+                && !pieceFoundDownRight){
+            console.log('Found queen which could beat at ', rowIndex + k, columnIndex + k)
+            return true
+        } else if(0 <= rowIndex + k && rowIndex + k <= 9 && 0 <= columnIndex + k && columnIndex + k <= 9
+                && rowIndex + k != startRow && columnIndex + k != startColumn
+                && this.board[rowIndex + k][columnIndex + k]){
+            console.log('Found piece at ', rowIndex + k, columnIndex + k)
+            pieceFoundDownRight = true;
+        } else {
+            console.log('NO DANGER FOUND AT', rowIndex + k, columnIndex + k)
+        }
+        console.log(9 >= (rowIndex - k) >= 0)
+        if(9 >= rowIndex - k && rowIndex - k >= 0 && 0 <= columnIndex + k && columnIndex + k <= 9
+                && rowIndex + k != startRow && columnIndex + k != startColumn
+                && this.board[rowIndex - k][columnIndex + k]
+                && this.board[rowIndex - k][columnIndex + k].playerId == (3-this.currentPlayer)
+                && this.board[rowIndex - k][columnIndex + k].isQueen
+                && !pieceFoundUpRight){
+                console.log('Found queen which could beat at ', rowIndex - k, columnIndex + k)
+            return true
+        } else if(9 >= rowIndex - k && rowIndex - k >= 0 && 0 <= columnIndex + k && columnIndex + k <= 9
+                && rowIndex + k != startRow && columnIndex + k != startColumn
+                && this.board[rowIndex - k][columnIndex + k]){
+                console.log('Found piece at ', rowIndex - k, columnIndex + k)
+            pieceFoundUpRight = true;
+        } else {
+            console.log('NO DANGER FOUND', rowIndex - k, columnIndex + k)
+        }
+
+        if(0 <= rowIndex + k && rowIndex + k <= 9 && 9 >= columnIndex - k && columnIndex - k >= 0
+                    && rowIndex + k != startRow && columnIndex + k != startColumn
+                    && this.board[rowIndex + k][columnIndex - k]
+                    && this.board[rowIndex + k][columnIndex - k].playerId == (3-this.currentPlayer)
+                    && this.board[rowIndex + k][columnIndex - k].isQueen
+                    && !pieceFoundDownLeft){
+                    console.log('Found queen which could beat at ', rowIndex + k, columnIndex - k)
+            return true
+        } else if(0 <= rowIndex + k && rowIndex + k <= 9 && 9 >= columnIndex - k && columnIndex - k >= 0
+                && rowIndex + k != startRow && columnIndex + k != startColumn
+                && this.board[rowIndex + k][columnIndex - k]){
+            pieceFoundDownLeft = true;
+            console.log('Found piece at ', rowIndex + k, columnIndex - k)
+        } else {
+            console.log('NO DANGER FOUND', rowIndex + k, columnIndex - k)
+        }
+
+        if(9 >= rowIndex - k && rowIndex - k >= 0 && 9 >= columnIndex - k && columnIndex - k >= 0
+                && rowIndex + k != startRow && columnIndex + k != startColumn
+                && this.board[rowIndex - k][columnIndex - k]
+                && this.board[rowIndex - k][columnIndex - k].playerId == (3-this.currentPlayer)
+                && this.board[rowIndex - k][columnIndex - k].isQueen
+                && !pieceFoundUpLeft){
+                console.log('Found queen which could beat at ', rowIndex - k, columnIndex - k)
+            return true
+        } else if(9 >= rowIndex - k && rowIndex - k >= 0 && 9 >= columnIndex - k && columnIndex - k >= 0
+                && rowIndex + k != startRow && columnIndex + k != startColumn
+                && this.board[rowIndex - k][columnIndex - k]){
+                console.log('Found piece at ', rowIndex - k, columnIndex - k)
+            pieceFoundUpLeft = true;
+        } else {
+            console.log('NO DANGER FOUND', rowIndex - k, columnIndex - k)
+        }
+    }
+
+    console.log('OUT OF FOR')
+    return false;
   }
 
 }
