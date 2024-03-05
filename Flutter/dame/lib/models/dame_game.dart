@@ -52,11 +52,11 @@ class DameGame {
     var checkBeatenPiece = checkAndRemoveOppBeaten(startX, startY, endX, endY, true);
     var foundOptimum = findMovesWhichBeat();
 
-    if(checkBeatenPiece == null && foundOptimum != null){
+    if(checkBeatenPiece == null && foundOptimum.getPiece() != null){
       stateString = 'Spieler ${currentPlayer} hat die Schlagpflicht verletzt, wähle einen anderen Zug';
       return false;
     }
-    if(foundOptimum != null && foundOptimum.isQueen && checkBeatenPiece != null
+    if(foundOptimum.getPiece() != null && foundOptimum.getPiece()!.isQueen && checkBeatenPiece != null
       && !checkBeatenPiece.isQueen){
       stateString = 'Dame schlagen geht vor';
           return false;
@@ -74,13 +74,12 @@ class DameGame {
     //}
     GamePiece? beatenPiece = checkAndRemoveOppBeaten(startX, startY, endX, endY, false);
 
-    log(board.toString());
     bool newQueen = checkForQueenConv();
 
 
 
     // Changes player, if futher beat is not possible or there was no beat in the first place
-    if(beatenPiece != null && findMovesWhichBeat() != null && newQueen == false){
+    if(beatenPiece != null && findMovesWhichBeat().getPiece() != null && newQueen == false){
       stateString = 'Spieler $currentPlayer bleibt dran';
     } else {
       currentPlayer = 3 - currentPlayer;
@@ -91,8 +90,13 @@ class DameGame {
       stateString = 'Spieler ${3-currentPlayer} hat gewonnen';
       Future.delayed(Duration(seconds: 5), (){
         resetGame();
-        print("Nach dem Aufruf von DameGame()");
+        log("Nach dem Aufruf von DameGame()");
       });
+    }
+
+    if(currentPlayer == 2){
+      log('SIM PC MOVE ${currentPlayer}');
+      simulateComputerMove();
     }
 
     return true;
@@ -150,9 +154,11 @@ class DameGame {
 
     bool jumpedOwnPiecesOrAir = false;
     List<List<int>> jumpedFields = getJumpedFields(startX, startY, endX, endY);
+    print('CALLED ISVALIDMOVE');
 
     // Checks if landing piece is free
     if(board[endY][endX] != null){
+      print('FIELD NOT EMPTY ${endY} ${endX}');
       stateString = 'Der Zielort muss ein freies Feld sein';
       return false;
     }
@@ -295,9 +301,9 @@ class DameGame {
     return false;
   }
 
-  GamePiece? findMovesWhichBeat(){
+  Move findMovesWhichBeat(){
 
-    var returnPiece;
+    var returnPiece = new Move(null, -1, -1, -1, -1);
 
     // Check if any elimination is possible
     for (var elementRow in board) {
@@ -318,9 +324,11 @@ class DameGame {
 
                 var returnedPiece = checkToChangeReturningPiece(returnPiece, tempPiece);
                 if(returnedPiece != null && returnedPiece.isQueen){
-                  return returnedPiece;
+                  return new Move(returnedPiece, elementRow.indexOf(elementItem) + 2, board.indexOf(elementRow) + 2,
+                      elementRow.indexOf(elementItem), board.indexOf(elementRow));
                 } else if(returnedPiece != null){
-                  returnPiece = returnedPiece;
+                  returnPiece = new Move(returnedPiece, elementRow.indexOf(elementItem) + 2, board.indexOf(elementRow) + 2,
+                      elementRow.indexOf(elementItem), board.indexOf(elementRow));
                 }
               }
             }
@@ -336,9 +344,11 @@ class DameGame {
 
                 var returnedPiece = checkToChangeReturningPiece(returnPiece, tempPiece);
                 if(returnedPiece != null && returnedPiece.isQueen){
-                  return returnedPiece;
+                  return new Move(returnedPiece, elementRow.indexOf(elementItem) - 2, board.indexOf(elementRow) + 2,
+                      elementRow.indexOf(elementItem), board.indexOf(elementRow));
                 } else if(returnedPiece != null){
-                  returnPiece = returnedPiece;
+                  returnPiece = new Move(returnedPiece, elementRow.indexOf(elementItem) - 2, board.indexOf(elementRow) + 2,
+                      elementRow.indexOf(elementItem), board.indexOf(elementRow));
                 }
               }
             }
@@ -353,9 +363,11 @@ class DameGame {
 
                 var returnedPiece = checkToChangeReturningPiece(returnPiece, tempPiece);
                 if(returnedPiece != null && returnedPiece.isQueen){
-                  return returnedPiece;
+                  return new Move(returnedPiece, elementRow.indexOf(elementItem) - 2, board.indexOf(elementRow) - 2,
+                      elementRow.indexOf(elementItem), board.indexOf(elementRow));
                 } else if(returnedPiece != null){
-                  returnPiece = returnedPiece;
+                  returnPiece = new Move(returnedPiece, elementRow.indexOf(elementItem) - 2, board.indexOf(elementRow) - 2,
+                      elementRow.indexOf(elementItem), board.indexOf(elementRow));
                 }
               }
             }
@@ -371,9 +383,11 @@ class DameGame {
 
                 var returnedPiece = checkToChangeReturningPiece(returnPiece, tempPiece);
                 if(returnedPiece != null && returnedPiece.isQueen){
-                  return returnedPiece;
+                  return new Move(returnedPiece, elementRow.indexOf(elementItem) + 2, board.indexOf(elementRow) - 2,
+                      elementRow.indexOf(elementItem), board.indexOf(elementRow));
                 } else if(returnedPiece != null){
-                  returnPiece = returnedPiece;
+                  returnPiece = new Move(returnedPiece, elementRow.indexOf(elementItem) + 2, board.indexOf(elementRow) - 2,
+                      elementRow.indexOf(elementItem), board.indexOf(elementRow));
                 }
               }
             }
@@ -387,9 +401,11 @@ class DameGame {
 
                   var returnedPiece = checkToChangeReturningPiece(returnPiece, tempPiece);
                   if(returnedPiece != null && returnedPiece.isQueen){
-                    return returnedPiece;
+                    return new Move(returnedPiece, elementRow.indexOf(elementItem) + i, board.indexOf(elementRow) + i,
+                        elementRow.indexOf(elementItem), board.indexOf(elementRow));
                   } else if(returnedPiece != null){
-                    returnPiece = returnedPiece;
+                    returnPiece = new Move(returnedPiece, elementRow.indexOf(elementItem) + i, board.indexOf(elementRow) + i,
+                        elementRow.indexOf(elementItem), board.indexOf(elementRow));
                   }
                 }
               }
@@ -401,9 +417,11 @@ class DameGame {
 
                   var returnedPiece = checkToChangeReturningPiece(returnPiece, tempPiece);
                   if(returnedPiece != null && returnedPiece.isQueen){
-                    return returnedPiece;
+                    return new Move(returnedPiece, elementRow.indexOf(elementItem) - i, board.indexOf(elementRow) + i,
+                        elementRow.indexOf(elementItem), board.indexOf(elementRow));
                   } else if(returnedPiece != null){
-                    returnPiece = returnedPiece;
+                    returnPiece = new Move(returnedPiece, elementRow.indexOf(elementItem) - i, board.indexOf(elementRow) + i,
+                        elementRow.indexOf(elementItem), board.indexOf(elementRow));
                   }
                 }
               }
@@ -415,9 +433,11 @@ class DameGame {
 
                   var returnedPiece = checkToChangeReturningPiece(returnPiece, tempPiece);
                   if(returnedPiece != null && returnedPiece.isQueen){
-                    return returnedPiece;
+                    return new Move(returnedPiece, elementRow.indexOf(elementItem) + i, board.indexOf(elementRow) - i,
+                        elementRow.indexOf(elementItem), board.indexOf(elementRow));
                   } else if(returnedPiece != null){
-                    returnPiece = returnedPiece;
+                    returnPiece = new Move(returnedPiece, elementRow.indexOf(elementItem) + i, board.indexOf(elementRow) - i,
+                        elementRow.indexOf(elementItem), board.indexOf(elementRow));
                   }
                 }
               }
@@ -429,9 +449,11 @@ class DameGame {
 
                   var returnedPiece = checkToChangeReturningPiece(returnPiece, tempPiece);
                   if(returnedPiece != null && returnedPiece.isQueen){
-                    return returnedPiece;
+                    return new Move(returnedPiece, elementRow.indexOf(elementItem) - i, board.indexOf(elementRow) - i,
+                        elementRow.indexOf(elementItem), board.indexOf(elementRow));
                   } else if(returnedPiece != null){
-                    returnPiece = returnedPiece;
+                    returnPiece = new Move(returnedPiece, elementRow.indexOf(elementItem) - i, board.indexOf(elementRow) - i,
+                        elementRow.indexOf(elementItem), board.indexOf(elementRow));
                   }
                 }
               }
@@ -469,14 +491,305 @@ class DameGame {
   }
 
   GamePiece? checkToChangeReturningPiece(returnPiece, tempPiece){
-    if (returnPiece == null) {
+    if (returnPiece.getPiece() == null) {
       return tempPiece;
-    } else if(!returnPiece.isQueen && tempPiece != null){
+    } else if(!returnPiece.getPiece().isQueen && tempPiece != null){
       return tempPiece;
     } else if(tempPiece != null && tempPiece.isQueen){
       return tempPiece;
     }
   }
 
+  simulateComputerMove(){
+    // Find moves which beat mit jedem Stein
 
+        // finds 'ideal' piece to move, returns null if no piece beats
+        var optimalMove = findMovesWhichBeat();
+        // Makes ideal move if possible
+        if(optimalMove.getPiece() != null){
+          print('FOUND OPTIMAL MOVE');
+          move(optimalMove.getStartX(), optimalMove.getStartY(), optimalMove.getEndX(), optimalMove.getEndY());
+          return;
+        } else {
+          print('FOUND NO OPTIMAL MOVE');
+        }
+
+    // Create crowned piece if possible
+        for(var i = 0; i <= 9; i++){
+          if(board[1][i] != null && board[1][i]!.playerId == 2 && i-1 >= 0 && board[0][i-1] == null && !board[1][i]!.isQueen){
+            print('FOUND PIECE TO CROWN TO LEFT');
+            move(i, 1, i-1, 0);
+            return;
+          } else if(board[1][i] != null && board[1][i]!.playerId == 2 && i+1 <= 9 && board[0][i+1] == null && !board[1][i]!.isQueen){
+            print('FOUND PIECE TO CROWN TO RIGHT');
+            move(i, 1, i+1, 0);
+            return;
+          } else {
+            print('FOUND NO PIECE TO CROWN');
+          }
+        }
+
+        // Makes random move which is not made from baseline
+        // Make move away from potential danger
+        for(var i = 0; i <= 8; i++){
+          for(var j = 0; j <= 9; j++){
+            if(board[i][j] != null && board[i][j]!.playerId == 2 && !board[i][j]!.isQueen){
+              if(isValidMove(j, i, j+1, i-1) && !surroundedByDanger(i-1, j+1, i, j)){
+                print('RANDOM MOVE BUT WITH NO DANGER');
+                move(j, i, j+1, i-1);
+                return;
+              } else if(isValidMove(j, i, j+1, i-1) && !surroundedByDanger(i-1, j+1, i, j)){
+                print('RANDOM MOVE BUT WITH NO DANGER');
+                move(j, i, j-1, i-1);
+                return;
+              }
+            }
+          }
+        }
+
+        // Makes random move which is not made from baseline
+        for(var i = 0; i <= 8; i++){
+          for(var j = 0; j <= 9; j++){
+            if(board[i][j] != null && this.board[i][j]!.playerId == 2 && !board[i][j]!.isQueen){
+              if(i-1 >= 0 && j+1 <= 9 && board[i-1][j+1] == null){
+                print('RANDOM MOVE BUT WITH POT DANGER');
+                move(j, i, j+1, i-1);
+                return;
+              } else if(i-1 >= 0 && j-1 >= 0 && board[i-1][j-1] != null){
+                print('RANDOM MOVE BUT WITH POT DANGER');
+                move(j, i, j-1, i-1);
+                return;
+              }
+            }
+          }
+        }
+
+        // Makes random move with dame
+        for(var i = 0; i <= 8; i++){
+          for(var j = 0; j <= 9; j++){
+            if(board[i][j] != null && board[i][j]!.playerId == 2 && board[i][j]!.isQueen){
+            log('FOUND PC STONE AT: ${i} ${j}');
+            for(var k = 1; k <= 9; k++){
+
+              log('SURROUNDED BY DANGER!!!!!?????????? - +');
+              if(isValidMove(j, i, j+k, i-k) && !surroundedByDanger(i-k, j+k, i, j)){
+                log('TOP RIGHT LETS GO ${i} ${j} ${i-k} ${j+k } THIS IS CURRENT K ${k}');
+                move(j, i, j-k, i+k);
+                log('MOVE DUN DUN');
+                return;
+              }
+
+              log('SURROUNDED BY DANGER!!!!!?????????? - -');
+              if(isValidMove(j, i, j-k, i-k) && !surroundedByDanger(i-k, j-k, i, j)){
+                move(j, i, j-k, i-k);
+                return;
+              }
+
+              log('SURROUNDED BY DANGER!!!!!?????????? + -');
+              if(isValidMove(j, i, j-k, i+k) && !surroundedByDanger(i+k, j-k, i, j)){
+                move(j, i, j-k, i+k);
+                return;
+              }
+
+              log('SURROUNDED BY DANGER!!!!!?????????? + +');
+              if(isValidMove(j, i, j+k, i+k) && !surroundedByDanger(i+k, j+k, i, j)){
+                move(j, i, j+k, i+k);
+                return;
+              }
+
+            }
+          }
+        }
+      }
+
+      // Makes random move with dame
+      for(var i = 0; i <= 8; i++){
+        for(var j = 0; j <= 9; j++){
+        if(board[i][j] != null && board[i][j]!.playerId == 2 && this.board[i][j]!.isQueen){
+          for(var k = 1; i+k <= 9 || i-k >= 0 || j+k <= 9 || j-k >= 0; k++){
+            if(i-k >= 0 && j+k <= 9 && board[i-k][j+k] == null){
+              move(j, i, j+k, i-k);
+              return;
+            } else if(i-k >= 0 && j-k >= 0 && board[i-k][j-k] == null){
+              move(j, i, j-k, i-k);
+              return;
+            } else if(i+k <= 9 && j-k >= 0 && board[i+k][j-k] == null){
+              move(j, i, j-k, i+k);
+              return;
+            } else if(i+k <= 9 && j+k <= 9 && board[i+k][j+k] == null){
+              move(j, i, j+k, i+k);
+              return;
+              }
+            }
+          }
+      }
+    }
+
+    // Make move from baseline
+    var startY = 9;
+    for(var i = 0; i <= 9; i++){
+      if(board[9][i] != null && this.board[9][i]!.playerId == 2){
+        if(i+1 <= 9 && board[8][i+1] == null){
+          move(i, 9, i+1, 8);
+          return;
+        } else if(i+1 >= 0 && board[8][i-1] == null){
+          move(i, 9, i-1, 8);
+          return;
+        }
+      }
+    }
+    // Make random queen move
+
+// Make the move
+// Change the player, whcih actually already when executing move i guess
+
+// Weitere Methoden wie Überprüfung auf gültige Züge, Überprüfung der Gewinnbedingungen usw.
+}
+
+  bool surroundedByDanger(int rowIndex, int columnIndex, int startRow, int startColumn) {
+    log("$rowIndex, $columnIndex, 'ALARM'");
+
+    
+    if (columnIndex + 1 <= 9 &&
+        rowIndex - 1 >= 0 &&
+        board[rowIndex - 1][columnIndex + 1] != null &&
+        board[rowIndex - 1][columnIndex + 1]!.playerId == (3 - currentPlayer) &&
+        !board[rowIndex - 1][columnIndex + 1]!.isQueen &&
+        columnIndex - 1 >= 0 &&
+        rowIndex + 1 <= 9 &&
+        (board[rowIndex + 1][columnIndex - 1] == null || (rowIndex + 1 == startRow && columnIndex - 1 == startColumn))) {
+      log('WE HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+      return true;
+    } else if (columnIndex - 1 >= 0 &&
+        rowIndex - 1 >= 0 &&
+        board[rowIndex - 1][columnIndex - 1] != null &&
+        board[rowIndex - 1][columnIndex - 1]!.playerId == (3 - currentPlayer) &&
+        !board[rowIndex - 1][columnIndex - 1]!.isQueen &&
+        columnIndex + 1 <= 9 &&
+        rowIndex + 1 <= 9 &&
+        (board[rowIndex + 1][columnIndex + 1] == null || (rowIndex + 1 == startRow && columnIndex + 1 == startColumn))) {
+      log('WE HERE');
+      return true;
+    }
+
+    bool pieceFoundUpLeft = false;
+    bool pieceFoundUpRight = false;
+    bool pieceFoundDownLeft = false;
+    bool pieceFoundDownRight = false;
+    int maxIndex = columnIndex > rowIndex ? columnIndex : rowIndex;
+
+    for (var k = 1; k + maxIndex <= 9; k++) {
+      log("$k, 'BIG OL K', $maxIndex");
+      if (0 <= (rowIndex + k) && (rowIndex + k) <= 9 &&
+          columnIndex + k <= 9 && columnIndex + k >= 0 &&
+          rowIndex + k != startRow && columnIndex + k != startColumn &&
+          board[rowIndex + k][columnIndex + k] != null &&
+          board[rowIndex + k][columnIndex + k]!.playerId == (3 - currentPlayer) &&
+          board[rowIndex + k][columnIndex + k]!.isQueen &&
+          !pieceFoundDownRight) {
+        log('Found queen which could beat at ${rowIndex + k}, ${columnIndex + k}');
+        return true;
+      } else if (0 <= (rowIndex + k) && (rowIndex + k) <= 9 &&
+          columnIndex + k <= 9 && columnIndex + k >= 0 &&
+          rowIndex + k != startRow && columnIndex + k != startColumn &&
+          board[rowIndex + k][columnIndex + k] != null) {
+        pieceFoundDownRight = true;
+        log('Found piece at ${rowIndex + k}, ${columnIndex + k}');
+      } else {
+        log('NO DANGER FOUND AT ${rowIndex + k}, ${columnIndex + k}');
+      }
+      if (0 <= (rowIndex - k) && (rowIndex - k) <= 9 &&
+          columnIndex + k <= 9 && columnIndex + k >= 0 &&
+          rowIndex - k != startRow && columnIndex + k != startColumn &&
+          board[rowIndex - k][columnIndex + k] != null &&
+          board[rowIndex - k][columnIndex + k]!.playerId == (3 - currentPlayer) &&
+          board[rowIndex - k][columnIndex + k]!.isQueen &&
+          !pieceFoundUpRight) {
+        log('Found queen which could beat at ${rowIndex - k}, ${columnIndex + k}');
+        return true;
+      } else if (0 <= (rowIndex - k) && (rowIndex - k) <= 9 &&
+          columnIndex + k <= 9 && columnIndex + k >= 0 &&
+          rowIndex - k != startRow && columnIndex + k != startColumn &&
+          board[rowIndex - k][columnIndex + k] != null) {
+        pieceFoundUpRight = true;
+        log('Found piece at ${rowIndex - k}, ${columnIndex + k}');
+      } else {
+        log('NO DANGER FOUND AT ${rowIndex - k}, ${columnIndex + k}');
+      }
+      if (0 <= (rowIndex + k) && (rowIndex + k) <= 9 &&
+          columnIndex - k <= 9 && columnIndex - k >= 0 &&
+          rowIndex + k != startRow && columnIndex - k != startColumn &&
+          board[rowIndex + k][columnIndex - k] != null &&
+          board[rowIndex + k][columnIndex - k]!.playerId == (3 - currentPlayer) &&
+          board[rowIndex + k][columnIndex - k]!.isQueen &&
+          !pieceFoundDownLeft) {
+        log('Found queen which could beat at ${rowIndex + k}, ${columnIndex - k}');
+        return true;
+      } else if (0 <= (rowIndex + k) && (rowIndex + k) <= 9 &&
+          columnIndex - k <= 9 && columnIndex - k >= 0 &&
+          rowIndex + k != startRow && columnIndex - k != startColumn &&
+          board[rowIndex + k][columnIndex - k] != null) {
+        pieceFoundDownLeft = true;
+        log('Found piece at ${rowIndex + k}, ${columnIndex - k}');
+      } else {
+        log('NO DANGER FOUND AT ${rowIndex + k}, ${columnIndex - k}');
+      }
+      if (0 <= (rowIndex - k) && (rowIndex - k) <= 9 &&
+          columnIndex - k <= 9 && columnIndex - k >= 0 &&
+          rowIndex - k != startRow && columnIndex - k != startColumn &&
+          board[rowIndex - k][columnIndex - k] != null &&
+          board[rowIndex - k][columnIndex - k]!.playerId == (3 - currentPlayer) &&
+          board[rowIndex - k][columnIndex - k]!.isQueen &&
+          !pieceFoundUpLeft) {
+        log('Found queen which could beat at ${rowIndex - k}, ${columnIndex - k}');
+        return true;
+      } else if (0 <= (rowIndex - k) && (rowIndex - k) <= 9 &&
+          columnIndex - k <= 9 && columnIndex - k >= 0 &&
+          rowIndex - k != startRow && columnIndex - k != startColumn &&
+          board[rowIndex - k][columnIndex - k] != null) {
+        pieceFoundUpLeft = true;
+        log('Found piece at ${rowIndex - k}, ${columnIndex - k}');
+      } else {
+        log('NO DANGER FOUND AT ${rowIndex - k}, ${columnIndex - k}');
+      }
+      // Additional checks similar to above for other directions
+      // ...
+
+    }
+
+    log('OUT OF FOR');
+    return false;
+  }
+
+
+}
+
+class Move {
+  GamePiece? piece;
+  int endX;
+  int endY;
+  int startX;
+  int startY;
+
+  Move(this.piece, this.endX, this.endY, this.startX, this.startY);
+
+  GamePiece? getPiece() {
+    return piece;
+  }
+
+  int getEndX() {
+    return endX;
+  }
+
+  int getEndY() {
+    return endY;
+  }
+
+  int getStartX() {
+    return startX;
+  }
+
+  int getStartY() {
+    return startY;
+  }
 }
