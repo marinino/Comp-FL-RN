@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'generate_password.dart';
 import 'top_home.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 void main() {
   runApp(
@@ -104,6 +108,23 @@ class HomeScreen extends StatelessWidget {
 
 class ListProvider extends ChangeNotifier {
 
+  ListProvider() {
+    loadItems(); // Load items when the provider is initialized
+  }
+
+  Future<void> loadItems() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    // Assuming you store your items under a single key as a list
+    String? itemsString = prefs.getString('items');
+    if (itemsString != null) {
+      List<dynamic> jsonList = json.decode(itemsString);
+      listItems = jsonList
+          .map((jsonItem) => AlphabeticalListItem.fromJson(jsonItem))
+          .toList();
+      notifyListeners();
+    }
+  }
+
   List<AlphabeticalListItem> listItems = [
     AlphabeticalListItem(application: 'Apple', email: 'example1@mail.com', password: '123456'),
     AlphabeticalListItem(application: 'Banana', email: 'example2@mail.com', password: '123456'),
@@ -117,6 +138,10 @@ class ListProvider extends ChangeNotifier {
     listItems.add(newItem);
     notifyListeners();
   }
+
+  List<AlphabeticalListItem> getList(){
+    return listItems;
+  }
 }
 
 class AlphabeticalListItem {
@@ -128,4 +153,20 @@ class AlphabeticalListItem {
 
   // Extract the first letter from the title
   String get firstLetter => application.isNotEmpty ? application[0].toUpperCase() : '';
+
+  // Convert a AlphabeticalListItem object into a map
+  Map<String, dynamic> toJson() => {
+    'application': application,
+    'email': email,
+    'password': password,
+  };
+
+  // Factory constructor to create an instance of AlphabeticalListItem from a map
+  factory AlphabeticalListItem.fromJson(Map<String, dynamic> json) {
+    return AlphabeticalListItem(
+      application: json['application'],
+      email: json['email'],
+      password: json['password'],
+    );
+  }
 }
