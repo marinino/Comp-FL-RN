@@ -649,7 +649,7 @@ class DameGame {
   bool surroundedByDanger(int rowIndex, int columnIndex, int startRow, int startColumn) {
     log("$rowIndex, $columnIndex, 'ALARM'");
 
-    
+
     if (columnIndex + 1 <= 9 &&
         rowIndex - 1 >= 0 &&
         board[rowIndex - 1][columnIndex + 1] != null &&

@@ -17,9 +17,19 @@ const CreatePassword = () => {
     const { data, updateData } = useContext(DataContext);
     const navigation = useNavigation();
 
+    const storeData = async (value) => {
+      try {
+        const jsonValue = JSON.stringify(value)
+        await AsyncStorage.setItem('@storage_Key', jsonValue)
+      } catch (e) {
+        // saving error
+      }
+    }
+
     const handleDataUpdate = (application, eMail) => {
         data.push({application: application, eMail: eMail, password: generatedPassword})
         updateData(data);
+        storeData(data)
     };
 
     const decrementNumberOfDigits = () => {

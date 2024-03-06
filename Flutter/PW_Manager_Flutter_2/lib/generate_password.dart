@@ -6,6 +6,8 @@ import 'dart:math';
 import 'top_home.dart';
 import 'main.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class SecondScreen extends StatefulWidget {
   @override
@@ -183,6 +185,12 @@ class _SecondScreenState extends State<SecondScreen> {
     });
   }
 
+  Future<void> saveObject(String key, List<AlphabeticalListItem> value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String jsonString = json.encode(value.map((item) => item.toJson()).toList()); // Convert your object to a JSON string
+    await prefs.setString(key, jsonString); // Save the JSON string
+  }
+
   String _generateString() {
     if (_passwordLength < _digitsValue + _capsValue + _symbolsValue) {
       throw ArgumentError('Total length should be greater than or equal to the sum of digits, capital letters, lowercase letters, and symbols.');
@@ -256,6 +264,8 @@ class _SecondScreenState extends State<SecondScreen> {
                     email: eMailInput.text,
                     password: _generatedString);
                 listProvider.addItem(item);
+
+                saveObject('items', listProvider.getList());
 
                 setState(() {});
                 //print(alphabeticalList.listItems.length);

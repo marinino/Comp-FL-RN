@@ -1,8 +1,10 @@
 import { StyleSheet,  View, Image, TouchableOpacity } from 'react-native';
 import { NavigationContainer, useNavigation  } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import React, { createContext, useState } from 'react';
+
+import React, { createContext, useState, useEffect } from 'react';
 
 
 import HomeScreen from './components/HomeScreen';
@@ -30,16 +32,50 @@ const App = () => {
     setData(newData);
   };
 
+  // Load data from storage when the app loads
+    useEffect(() => {
+      const loadData = async () => {
+        try {
+          const jsonValue = await AsyncStorage.getItem('@storage_Key');
+          if (jsonValue != null) {
+            const loadedData = JSON.parse(jsonValue);
+            setData(loadedData); // Update the state with loaded data
+          }
+        } catch (e) {
+          console.error('Error loading data', e);
+        }
+      };
+
+      loadData();
+    }, []); // The empty array means this effect runs once on mount
+
+
   return (
     
       <DataContext.Provider value={{ data, updateData }}>
         <NavigationContainer>
-          <Tab.Navigator>
+          <Tab.Navigator
+            screenOptions={({ route }) => ({
+              tabBarIcon: ({ focused, color, size }) => {
+                let iconName;
+
+                if (route.name === 'HomeScreen') {
+                  iconName = homeIcon;
+                } else if (route.name === 'CreatePassword') {
+                  iconName = createPasswordIcon;
+                }
+
+                // You can return any component that you like here!
+                return <Image source={iconName} style={{ width: size, height: size }} />;
+              },
+              tabBarActiveTintColor: 'tomato',
+              tabBarInactiveTintColor: 'gray',
+            })}
+          >
             <Tab.Screen name="HomeScreen" component={HomeScreen} />
-            <Tab.Screen name="CreatePassword" component={CreatePassword}/>
+            <Tab.Screen name="CreatePassword" component={CreatePassword} />
             {/* Add more screens as needed */}
           </Tab.Navigator>
-          <BottomNavigationBar/>
         </NavigationContainer>
       </DataContext.Provider>
       
@@ -48,22 +84,7 @@ const App = () => {
   );
 }
 
-const BottomNavigationBar = () => {
 
-  const navigation = useNavigation();
-
-  return (
-    <View style={styles.bottomBar}>
-      <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')} style={styles.button}>
-        <Image source={homeIcon} style={styles.buttonIcon} />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate('CreatePassword')} style={styles.button}>
-        <Image source={createPasswordIcon} style={styles.buttonIcon} />
-      </TouchableOpacity>
-      {/* Add more tabs as needed */}
-    </View>
-  );
-};
 
 const styles = StyleSheet.create({
   bottomBar: {
