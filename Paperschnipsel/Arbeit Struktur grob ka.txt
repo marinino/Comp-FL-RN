@@ -1,0 +1,6 @@
+1. 	drittel: Was wollte man machen[mit kritiren] [[Ziel]] real: 25
+2.	drittel: Was wurde gemacht [[Arbeit]] real: 50
+3. 	Welche erkentniss kam bei rum [[Conclusion]] real: 25 ergänzend leitfaden
+
+physik erst langsam dann schnell für animation
+hive für speichern in flutter

@@ -1,10 +1,14 @@
 export default class GamePiece {
+  pieceId: string;
   playerId: number;
   isQueen: boolean;
+  isAnimated: boolean;
 
-  constructor(playerId: number, isQueen: boolean = false) {
+  constructor(pieceId: string, playerId: number, isAnimated = false, isQueen: boolean = false) {
+    this.pieceId = pieceId
     this.playerId = playerId;
     this.isQueen = isQueen;
+    this.isAnimated = isAnimated;
   }
 
   promoteToQueen(): void {
