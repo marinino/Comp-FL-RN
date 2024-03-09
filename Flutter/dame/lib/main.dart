@@ -22,21 +22,46 @@ class DameBoard extends StatefulWidget {
   _DameBoardState createState() => _DameBoardState();
 }
 
-class _DameBoardState extends State<DameBoard> {
+class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
 
 
   late DameGame game;
+  AnimationController? _animationController;
+  Animation<Offset>? _animation;
+
 
   @override
   void initState() {
     super.initState();
     game = DameGame();
     game.addListener(_updateGame);
+
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 10000),
+      vsync: this,
+    )..addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        // Do something when the animation ends
+        print("Animation completed!");
+        for(var i = 0; i < 10; i++){
+          for(var j = 0; j < 10; j++){
+            game.board[i][j]?.isAnimated = false;
+          }
+        }
+        if(game.currentPlayer == 2){
+          log('SIM PC MOVE ${game.currentPlayer}');
+          var dataFromMove = game.simulateComputerMove();
+          _startAnimation(dataFromMove[0] ,dataFromMove[1] , dataFromMove[2], dataFromMove[3]);
+        }
+        print("Animation completed!");
+      }
+    });
   }
 
   @override
   void dispose() {
     game.removeListener(_updateGame);
+    _animationController?.dispose();
     super.dispose();
   }
 
@@ -54,8 +79,6 @@ class _DameBoardState extends State<DameBoard> {
 
 
   void onFieldTap(int row, int column) {
-    log(row.toString() + '; ' + column.toString());
-    log(selectedY.toString() + '; sel: ' + selectedX.toString());
     if(selectedX == -1){
       if(game.board[row][column]?.playerId != game.currentPlayer){
         return;
@@ -72,8 +95,9 @@ class _DameBoardState extends State<DameBoard> {
       return;
     }
     else {
-      log('Tried to call move');
+
       game.move(selectedX ,selectedY , column, row);
+      _startAnimation(selectedX ,selectedY , column, row);
 
       selectedX = -1;
       selectedY = -1;
@@ -86,6 +110,123 @@ class _DameBoardState extends State<DameBoard> {
     // Hier können Sie weitere Interaktionen hinzufügen
   }
 
+  void _startAnimation(int startX, int startY, int endX, int endY) {
+    log('PINWORD' + startX.toString() + ' ' + startY.toString() + ' ' + endX.toString() + ' ' + ' ' + endY.toString());
+    final beginOffset = Offset((startX.toDouble() - endX.toDouble()) * (MediaQuery.of(context).size.width / 10),
+        (startY.toDouble()- endY.toDouble()) * (MediaQuery.of(context).size.width / 10));
+    final endOffset = Offset((MediaQuery.of(context).size.width / 10) * 0.1,(MediaQuery.of(context).size.width / 10)  * 0.1);
+    _animation = Tween<Offset>(begin: beginOffset, end: endOffset).animate(
+      CurvedAnimation(parent: _animationController!, curve: Curves.easeInOut),
+    );
+
+    _animationController?.forward(from: 0.0);
+    log('START ANIMATION OR DONE ODER SO 1234');
+
+
+    setState(() {
+      // Trigger rebuild to start animation
+    });
+  }
+
+  Widget createPieceWidget(Color color, String letter, bool animate, int x, int y) {
+    // Create the base piece widget
+    Widget piece = Stack(
+      alignment: Alignment.center,
+      children: [
+        SizedBox(
+          width: (MediaQuery.of(context).size.width / 10) * 0.8,
+          height: (MediaQuery.of(context).size.width / 10) * 0.8,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ),
+        Text(
+          letter,
+          style: TextStyle(
+            color: color == Colors.black ? Colors.white : Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+    // Apply animation if needed
+    print(piece);
+    if (animate && _animation != null) {
+      piece = AnimatedBuilder(
+        animation: _animation!,
+        builder: (context, child) {
+          return Transform.translate(
+            offset: _animation!.value - Offset(x.toDouble(), y.toDouble()),
+            child: child,
+          );
+        },
+        child: piece,
+      );
+    }
+
+    // Wrap the piece in an IgnorePointer if you don't want it to intercept touch events
+    return IgnorePointer(
+      ignoring: true, // Set to true to ignore pointer events, false to allow them
+      child: piece,
+    );
+  }
+
+  Widget buildGamePieces() {
+    double screenWidth = MediaQuery.of(context).size.width;
+    List<Widget> pieces = [];
+    // Iterate over the game state to create widgets for each piece
+    for (var row = 0; row < 10; row++) {
+      for (var col = 0; col < 10; col++) {
+        final piece = game.board[row][col];
+        if (piece != null) {
+          final letter = piece.isQueen ? 'D' : '';
+          final color = piece.playerId == 2 ? Colors.black : Colors.white;
+          final pieceWidget = Positioned(
+            left: col * (screenWidth / 10) + screenWidth / 10 * 0.1,
+            top: row * (screenWidth / 10) + screenWidth / 10 * 0.1,
+            child: createPieceWidget(color, letter, piece.isAnimated, col, row),
+          );
+          pieces.add(pieceWidget);
+        }
+      }
+    }
+    return Stack(children: pieces);
+  }
+
+
+  Widget buildGameBoard() {
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 10, // Define the number of columns in the grid
+      ),
+      itemCount: 100, // Total number of squares (10x10 board)
+      itemBuilder: (context, index) {
+        int row = index ~/ 10; // Calculate row number
+        int col = index % 10; // Calculate column number
+        bool isDarkField = (index % 2 == 0) ^ (row % 2 == 0); // Determine if the square should be dark
+        Color color = isDarkField ? Colors.brown[700]! : Colors.brown[200]!; // Set color based on whether the field is dark or not
+
+        // Simply return a container for each grid square
+        return InkWell(
+            onTap: () {
+            // Handle the tap, e.g., by calling onFieldTap with the row and column
+            onFieldTap(row, col);
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: color, // Use the calculated color
+              border: Border.all(color: Colors.grey), // Add border to distinguish between squares
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,50 +235,13 @@ class _DameBoardState extends State<DameBoard> {
       ),
       body: Column(
         children: [
-          Expanded(
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 10, // 10 Spalten
-              ),
-              itemCount: 100, // 10x10 Felder
-              itemBuilder: (context, index) {
-                int row = index ~/ 10;
-                int col = index % 10;
-                bool isDarkField = (index % 2 == 0) ^ (row % 2 == 0);
-                Color? color = isDarkField ? Colors.brown[700] : Colors.brown[200];
+          Expanded(child: Stack(
+            children: [
+              buildGameBoard(),
+              buildGamePieces()
+            ],
+          )
 
-
-
-                // Bestimmen Sie, welcher Spielstein (falls vorhanden) in diesem Feld ist
-                Widget piece = SizedBox();
-                if (isDarkField) {
-                  String letter = '';
-                  if(game.board[row][col] != null && game.board[row][col]!.isQueen){
-                    letter = 'D';
-                  }
-                  if (game.board[row][col]?.playerId == 1) { // Spieler 1
-
-                    piece = buildPiece(Colors.white, letter);
-                  } else if (game.board[row][col]?.playerId == 2) { // Spieler 2
-
-                    piece = buildPiece(Colors.black, letter);
-                  }
-                }
-
-                return InkWell(
-                  onTap: () => onFieldTap(index ~/ 10, index % 10),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: color,
-                      border: Border.all(color: Colors.grey),
-                    ),
-                    child: Center(
-                      child: piece,
-                    ),
-                  ),
-                );
-              },
-            ),
           ),
           Container(
             child: Text(game.stateString,
@@ -154,35 +258,3 @@ class _DameBoardState extends State<DameBoard> {
   }
 }
 
-Widget buildPiece(Color color, String letter) {
-
-  bool pieceIsBlack = false;
-  if(color == Colors.black){
-    pieceIsBlack = true;
-  }
-
-  return Stack(
-    alignment: Alignment.center,
-    children: [
-      FractionallySizedBox(
-        widthFactor: 0.8,
-        heightFactor: 0.8,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-        ),
-      ),
-      Text(letter,
-
-        style: TextStyle(
-          color: pieceIsBlack ? Colors.white : Colors.black, // Wählen Sie eine passende Textfarbe
-          fontWeight: FontWeight.bold,
-
-        ),
-      )
-    ],
-
-  );
-}

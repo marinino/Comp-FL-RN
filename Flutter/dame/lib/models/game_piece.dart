@@ -1,8 +1,9 @@
 class GamePiece {
   int playerId;
   bool isQueen;
+  bool isAnimated;
 
-  GamePiece({required this.playerId, this.isQueen = false});
+  GamePiece({required this.playerId, this.isQueen = false, this.isAnimated = false});
 
   // Eine Methode, um den Spielstein zur Dame zu machen
   void promoteToQueen() {

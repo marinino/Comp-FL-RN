@@ -18,16 +18,18 @@ export default class DameGame {
     this.board = Array.from({ length: this.boardSize }, () => Array(this.boardSize).fill(null));
     this.currentPlayer = 1; // 1 für Spieler 1, 2 für Spieler 2
 
-
+    this.board[0][5] = new GamePiece(`${0}-${5}`, 2, false, true);
+    this.board[1][4] = new GamePiece(`${1}-${4}`, 1, false);
+    this.board[1][2] = new GamePiece(`${1}-${2}`, 1, false);
 
     // Initialisieren des Bretts mit Spielsteinen
     for (let row = 0; row < this.boardSize; row++) {
       for (let col = 0; col < this.boardSize; col++) {
         if ((row + col) % 2 === 1) {
           if (row < 4) {
-            this.board[row][col] = new GamePiece(`${row}-${col}`, 1, false);
+            //this.board[row][col] = new GamePiece(`${row}-${col}`, 1, false);
           } else if (row >= 6) {
-            this.board[row][col] = new GamePiece(`${row}-${col}`, 2, false);
+            //this.board[row][col] = new GamePiece(`${row}-${col}`, 2, false);
           }
         }
       }
@@ -706,13 +708,19 @@ export default class DameGame {
     console.log(rowIndex, columnIndex, 'ALARM')
 
     // Checks if piece is could be normally beaten
-    if(columnIndex + 1 <= 9 && rowIndex - 1 >= 0 && this.board[rowIndex - 1][columnIndex + 1] && this.board[rowIndex - 1][columnIndex + 1].playerId == (3-this.currentPlayer) && !this.board[rowIndex - 1][columnIndex + 1].isQueen &&
-            columnIndex - 1 >= 0 && rowIndex + 1 <= 9 && !this.board[rowIndex + 1][columnIndex - 1]){
-            console.log('WE HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+    if(columnIndex + 1 <= 9 && rowIndex - 1 >= 0 && this.board[rowIndex - 1][columnIndex + 1] &&
+            this.board[rowIndex - 1][columnIndex + 1].playerId == (3-this.currentPlayer) &&
+            !this.board[rowIndex - 1][columnIndex + 1].isQueen &&
+            columnIndex - 1 >= 0 && rowIndex + 1 <= 9 &&
+            (!this.board[rowIndex + 1][columnIndex - 1] || (rowIndex + 1 == startRow && columnIndex - 1 == startColumn))){
+        console.log('WE HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
         return true;
 
-    }else if(columnIndex - 1 >= 0 && rowIndex - 1 >= 0 && this.board[rowIndex - 1][columnIndex - 1] && this.board[rowIndex - 1][columnIndex - 1].playerId == (3-this.currentPlayer) && !this.board[rowIndex - 1][columnIndex - 1].isQueen &&
-            columnIndex + 1 <= 9 && rowIndex + 1 <= 9 && !this.board[rowIndex + 1][columnIndex + 1]){
+    }else if(columnIndex - 1 >= 0 && rowIndex - 1 >= 0 && this.board[rowIndex - 1][columnIndex - 1] &&
+            this.board[rowIndex - 1][columnIndex - 1].playerId == (3-this.currentPlayer) &&
+            !this.board[rowIndex - 1][columnIndex - 1].isQueen &&
+            columnIndex + 1 <= 9 && rowIndex + 1 <= 9 &&
+             (!this.board[rowIndex + 1][columnIndex + 1] || (rowIndex + 1 == startRow && columnIndex + 1 == startColumn))){
             console.log('WE HERE')
         return true;
     }

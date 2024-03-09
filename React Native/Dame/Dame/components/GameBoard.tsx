@@ -8,12 +8,18 @@ const GameBoard = () => {
 
     const [updateCounter, setUpdateCounter] = useState(0);
     const [updateCounter2, setUpdateCounter2] = useState(0);
+    const [forceRerenderZIndex, setForceRerenderZIndex] = useState(0);
     const [animatedPieceId, setAnimatedPieceId] = useState(null);
+    const [animatedPiece, setAnimatedPiece] = useState(null);
 
 
     const [isInitialized, setIsInitialized] = useState(false);
     const squareSize = (Dimensions.get('window').width) / 10; // Assuming a square board for simplicity
 
+    const forceUpdateZIndex = (pieceId) => {
+      setAnimatedPiece()
+      console.log('UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUPPPPPPPPPPPPPPPPPPPPPPDDDDDDDDDDDDDDDDDDDDDDDAAAAAAAAAAAAAAATTTTE')
+    };
 
     const forceUpdate = () => {
       setUpdateCounter(updateCounter + 1);
@@ -31,7 +37,6 @@ const GameBoard = () => {
       // game.movePiece(startRow, startCol, row, col);
       //setAnimatedPieceId(`${row}-${column}`)
       await game.handlePressDeep(row, column)
-      setAnimatedPieceId(null)
 
       console.log('HandlePress is DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDONE')
         //HIII
@@ -73,6 +78,7 @@ const GameBoard = () => {
 });
 
     const renderPieces = () => {
+
         console.log('RENDERING PIECESr')
       return game.board.flatMap((row, rowIndex) =>
         row.map((piece, colIndex) => {
@@ -81,6 +87,9 @@ const GameBoard = () => {
 
             // Determine if this piece is the one being animated
             const isAnimating = piece.isAnimated;
+            if(isAnimating){
+                forceUpdateZIndex(piece.pieceId)
+            }
             const pieceZIndex = isAnimating ? 1000 : 1; // Elevated zIndex for the animating piece
 
             console.log(pieceZIndex)
@@ -90,8 +99,9 @@ const GameBoard = () => {
                 { translateX: game.pieceAnimatedValues[piece.pieceId].x},
                 { translateY: game.pieceAnimatedValues[piece.pieceId].y},
               ],
-              zIndex: pieceZIndex
+              zIndex: pieceZIndex,
             };
+
             piece.isAnimated = false
             return (
 
@@ -138,6 +148,7 @@ const GameBoard = () => {
            scrollEnabled={false} // Optionally disable scrolling if the board should be static
            style={[styles.board]}
          />
+
          {renderPieces()}
 
         <View style={styles.statusContainer}>

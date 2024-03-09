@@ -63,6 +63,9 @@ class DameGame {
     }
 
     // Führen Sie den Zug aus
+
+    board[startY][startX]?.isAnimated = true;
+
     board[endY][endX] = board[startY][startX];
     board[startY][startX] = null;
 
@@ -72,7 +75,7 @@ class DameGame {
     //if (board[midX][midY] != null) {
     //  log('Puff');
     //}
-    GamePiece? beatenPiece = checkAndRemoveOppBeaten(startX, startY, endX, endY, false);
+    GamePiece? beatenPiece = checkAndRemoveOppBeaten(startX, startY, endX, endY, true);
 
     bool newQueen = checkForQueenConv();
 
@@ -94,10 +97,7 @@ class DameGame {
       });
     }
 
-    if(currentPlayer == 2){
-      log('SIM PC MOVE ${currentPlayer}');
-      simulateComputerMove();
-    }
+
 
     return true;
   }
@@ -500,7 +500,7 @@ class DameGame {
     }
   }
 
-  simulateComputerMove(){
+  List<int> simulateComputerMove(){
     // Find moves which beat mit jedem Stein
 
         // finds 'ideal' piece to move, returns null if no piece beats
@@ -509,7 +509,7 @@ class DameGame {
         if(optimalMove.getPiece() != null){
           print('FOUND OPTIMAL MOVE');
           move(optimalMove.getStartX(), optimalMove.getStartY(), optimalMove.getEndX(), optimalMove.getEndY());
-          return;
+          return [optimalMove.getStartX(), optimalMove.getStartY(), optimalMove.getEndX(), optimalMove.getEndY()];
         } else {
           print('FOUND NO OPTIMAL MOVE');
         }
@@ -519,11 +519,11 @@ class DameGame {
           if(board[1][i] != null && board[1][i]!.playerId == 2 && i-1 >= 0 && board[0][i-1] == null && !board[1][i]!.isQueen){
             print('FOUND PIECE TO CROWN TO LEFT');
             move(i, 1, i-1, 0);
-            return;
+            return [i, 1, i-1, 0];
           } else if(board[1][i] != null && board[1][i]!.playerId == 2 && i+1 <= 9 && board[0][i+1] == null && !board[1][i]!.isQueen){
             print('FOUND PIECE TO CROWN TO RIGHT');
             move(i, 1, i+1, 0);
-            return;
+            return [i, 1, i+1, 0];
           } else {
             print('FOUND NO PIECE TO CROWN');
           }
@@ -537,11 +537,11 @@ class DameGame {
               if(isValidMove(j, i, j+1, i-1) && !surroundedByDanger(i-1, j+1, i, j)){
                 print('RANDOM MOVE BUT WITH NO DANGER');
                 move(j, i, j+1, i-1);
-                return;
+                return [j, i, j+1, i-1];
               } else if(isValidMove(j, i, j+1, i-1) && !surroundedByDanger(i-1, j+1, i, j)){
                 print('RANDOM MOVE BUT WITH NO DANGER');
                 move(j, i, j-1, i-1);
-                return;
+                return [j, i, j-1, i-1];
               }
             }
           }
@@ -554,11 +554,11 @@ class DameGame {
               if(i-1 >= 0 && j+1 <= 9 && board[i-1][j+1] == null){
                 print('RANDOM MOVE BUT WITH POT DANGER');
                 move(j, i, j+1, i-1);
-                return;
+                return [j, i, j+1, i-1];
               } else if(i-1 >= 0 && j-1 >= 0 && board[i-1][j-1] != null){
                 print('RANDOM MOVE BUT WITH POT DANGER');
                 move(j, i, j-1, i-1);
-                return;
+                return [j, i, j-1, i-1];
               }
             }
           }
@@ -576,25 +576,25 @@ class DameGame {
                 log('TOP RIGHT LETS GO ${i} ${j} ${i-k} ${j+k } THIS IS CURRENT K ${k}');
                 move(j, i, j-k, i+k);
                 log('MOVE DUN DUN');
-                return;
+                return [j, i, j-k, i+k];
               }
 
               log('SURROUNDED BY DANGER!!!!!?????????? - -');
               if(isValidMove(j, i, j-k, i-k) && !surroundedByDanger(i-k, j-k, i, j)){
                 move(j, i, j-k, i-k);
-                return;
+                return [j, i, j-k, i-k];
               }
 
               log('SURROUNDED BY DANGER!!!!!?????????? + -');
               if(isValidMove(j, i, j-k, i+k) && !surroundedByDanger(i+k, j-k, i, j)){
                 move(j, i, j-k, i+k);
-                return;
+                return [j, i, j-k, i+k];
               }
 
               log('SURROUNDED BY DANGER!!!!!?????????? + +');
               if(isValidMove(j, i, j+k, i+k) && !surroundedByDanger(i+k, j+k, i, j)){
                 move(j, i, j+k, i+k);
-                return;
+                return [j, i, j+k, i+k];
               }
 
             }
@@ -609,16 +609,16 @@ class DameGame {
           for(var k = 1; i+k <= 9 || i-k >= 0 || j+k <= 9 || j-k >= 0; k++){
             if(i-k >= 0 && j+k <= 9 && board[i-k][j+k] == null){
               move(j, i, j+k, i-k);
-              return;
+              return [j, i, j+k, i-k];
             } else if(i-k >= 0 && j-k >= 0 && board[i-k][j-k] == null){
               move(j, i, j-k, i-k);
-              return;
+              return [j, i, j-k, i-k];
             } else if(i+k <= 9 && j-k >= 0 && board[i+k][j-k] == null){
               move(j, i, j-k, i+k);
-              return;
+              return [j, i, j-k, i+k];
             } else if(i+k <= 9 && j+k <= 9 && board[i+k][j+k] == null){
               move(j, i, j+k, i+k);
-              return;
+              return [j, i, j+k, i+k];
               }
             }
           }
@@ -631,13 +631,14 @@ class DameGame {
       if(board[9][i] != null && this.board[9][i]!.playerId == 2){
         if(i+1 <= 9 && board[8][i+1] == null){
           move(i, 9, i+1, 8);
-          return;
+          return [i, 9, i+1, 8];
         } else if(i+1 >= 0 && board[8][i-1] == null){
           move(i, 9, i-1, 8);
-          return;
+          return [i, 9, i-1, 8];
         }
       }
     }
+    return [-1, -1, -1, -1];
     // Make random queen move
 
 // Make the move
