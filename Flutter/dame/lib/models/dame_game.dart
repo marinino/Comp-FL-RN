@@ -75,27 +75,7 @@ class DameGame {
     //if (board[midX][midY] != null) {
     //  log('Puff');
     //}
-    GamePiece? beatenPiece = checkAndRemoveOppBeaten(startX, startY, endX, endY, true);
 
-    bool newQueen = checkForQueenConv();
-
-
-
-    // Changes player, if futher beat is not possible or there was no beat in the first place
-    if(beatenPiece != null && findMovesWhichBeat().getPiece() != null && newQueen == false){
-      stateString = 'Spieler $currentPlayer bleibt dran';
-    } else {
-      currentPlayer = 3 - currentPlayer;
-      stateString = 'Spieler $currentPlayer ist dran';
-    }
-
-    if(checkWin()){
-      stateString = 'Spieler ${3-currentPlayer} hat gewonnen';
-      Future.delayed(Duration(seconds: 5), (){
-        resetGame();
-        log("Nach dem Aufruf von DameGame()");
-      });
-    }
 
 
 
@@ -105,6 +85,7 @@ class DameGame {
   GamePiece? checkAndRemoveOppBeaten(int startX, int startY, int endX, endY, bool simulate){
 
     GamePiece? beatenPiece;
+    log('REMOVED BEATEN PIECE');
 
     // Only no fields were jumped, so nobody could be beaten
     if((startX - endX).abs() == 1){
@@ -534,11 +515,11 @@ class DameGame {
         for(var i = 0; i <= 8; i++){
           for(var j = 0; j <= 9; j++){
             if(board[i][j] != null && board[i][j]!.playerId == 2 && !board[i][j]!.isQueen){
-              if(isValidMove(j, i, j+1, i-1) && !surroundedByDanger(i-1, j+1, i, j)){
+              if(j + 1 < 10 && i - 1 >= 0 && isValidMove(j, i, j+1, i-1) && !surroundedByDanger(i-1, j+1, i, j)){
                 print('RANDOM MOVE BUT WITH NO DANGER');
                 move(j, i, j+1, i-1);
                 return [j, i, j+1, i-1];
-              } else if(isValidMove(j, i, j+1, i-1) && !surroundedByDanger(i-1, j+1, i, j)){
+              } else if(j - 1 >= 0 && i - 1 >= 0 && isValidMove(j, i, j-1, i-1) && !surroundedByDanger(i-1, j-1, i, j)){
                 print('RANDOM MOVE BUT WITH NO DANGER');
                 move(j, i, j-1, i-1);
                 return [j, i, j-1, i-1];

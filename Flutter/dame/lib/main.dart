@@ -1,5 +1,5 @@
 import 'dart:developer';
-
+import '../models/game_piece.dart';
 import '../models/dame_game.dart';
 import 'package:flutter/material.dart';
 
@@ -28,6 +28,11 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
   late DameGame game;
   AnimationController? _animationController;
   Animation<Offset>? _animation;
+  late double _screenWidth;
+  late int _postAnimationStartX;
+  late int _postAnimationStartY;
+  late int _postAnimationEndX;
+  late int _postAnimationEndY;
 
 
   @override
@@ -39,28 +44,26 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 10000),
       vsync: this,
-    )..addStatusListener((status) {
+    );
+
+    // Adding a status listener to the animation controller
+    _animationController!.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        // Do something when the animation ends
-        print("Animation completed!");
-        for(var i = 0; i < 10; i++){
-          for(var j = 0; j < 10; j++){
-            game.board[i][j]?.isAnimated = false;
-          }
-        }
-        if(game.currentPlayer == 2){
-          log('SIM PC MOVE ${game.currentPlayer}');
-          var dataFromMove = game.simulateComputerMove();
-          _startAnimation(dataFromMove[0] ,dataFromMove[1] , dataFromMove[2], dataFromMove[3]);
-        }
-        print("Animation completed!");
+        // Animation is complete. Execute additional logic here.
+        log("Animation completed");
+        // You can perform additional logic here, similar to using .then()
+        onAnimationComplete(); // Call a method when the animation completes
       }
     });
+
   }
+
+
 
   @override
   void dispose() {
     game.removeListener(_updateGame);
+    _animationController?.removeStatusListener((status) {});
     _animationController?.dispose();
     super.dispose();
   }
@@ -98,6 +101,8 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
 
       game.move(selectedX ,selectedY , column, row);
       _startAnimation(selectedX ,selectedY , column, row);
+      setAfterAnimationValues(selectedX ,selectedY , column, row);
+
 
       selectedX = -1;
       selectedY = -1;
@@ -111,17 +116,16 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
   }
 
   void _startAnimation(int startX, int startY, int endX, int endY) {
-    log('PINWORD' + startX.toString() + ' ' + startY.toString() + ' ' + endX.toString() + ' ' + ' ' + endY.toString());
-    final beginOffset = Offset((startX.toDouble() - endX.toDouble()) * (MediaQuery.of(context).size.width / 10),
-        (startY.toDouble()- endY.toDouble()) * (MediaQuery.of(context).size.width / 10));
-    final endOffset = Offset((MediaQuery.of(context).size.width / 10) * 0.1,(MediaQuery.of(context).size.width / 10)  * 0.1);
+    log('PINWORD' + _screenWidth.toString());
+    final beginOffset = Offset((((startX.toDouble() - endX.toDouble()) * (_screenWidth / 10 )) + ((_screenWidth / 10 ) * 0.1)),
+        ((startY.toDouble()- endY.toDouble()) * (_screenWidth / 10 )) + ((_screenWidth / 10 ) * 0.1));
+    final endOffset = Offset((_screenWidth) / 10 * 0.1,(_screenWidth) / 10  * 0.1);
     _animation = Tween<Offset>(begin: beginOffset, end: endOffset).animate(
       CurvedAnimation(parent: _animationController!, curve: Curves.easeInOut),
     );
 
     _animationController?.forward(from: 0.0);
     log('START ANIMATION OR DONE ODER SO 1234');
-
 
     setState(() {
       // Trigger rebuild to start animation
@@ -134,8 +138,8 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
       alignment: Alignment.center,
       children: [
         SizedBox(
-          width: (MediaQuery.of(context).size.width / 10) * 0.8,
-          height: (MediaQuery.of(context).size.width / 10) * 0.8,
+          width: (_screenWidth / 10) * 0.8,
+          height: (_screenWidth / 10) * 0.8,
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: color,
@@ -175,8 +179,10 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
   }
 
   Widget buildGamePieces() {
-    double screenWidth = MediaQuery.of(context).size.width;
+    _screenWidth = MediaQuery.of(context).size.width;
     List<Widget> pieces = [];
+    Widget? animatedPieceWidget;
+
     // Iterate over the game state to create widgets for each piece
     for (var row = 0; row < 10; row++) {
       for (var col = 0; col < 10; col++) {
@@ -184,14 +190,26 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
         if (piece != null) {
           final letter = piece.isQueen ? 'D' : '';
           final color = piece.playerId == 2 ? Colors.black : Colors.white;
-          final pieceWidget = Positioned(
-            left: col * (screenWidth / 10) + screenWidth / 10 * 0.1,
-            top: row * (screenWidth / 10) + screenWidth / 10 * 0.1,
-            child: createPieceWidget(color, letter, piece.isAnimated, col, row),
-          );
-          pieces.add(pieceWidget);
+
+          if(piece.isAnimated) {
+            animatedPieceWidget = Positioned(
+              left: col * (_screenWidth / 10) + _screenWidth / 10 * 0.1,
+              top: row * (_screenWidth / 10) + _screenWidth / 10 * 0.1,
+              child: createPieceWidget(color, letter, piece.isAnimated, col, row),
+            );
+          } else {
+            pieces.add(Positioned(
+              left: col * (_screenWidth / 10) + _screenWidth / 10 * 0.1,
+              top: row * (_screenWidth / 10) + _screenWidth / 10 * 0.1,
+              child: createPieceWidget(color, letter, piece.isAnimated, col, row),
+            ));
+          }
+
         }
       }
+    }
+    if(animatedPieceWidget != null){
+      pieces.add(animatedPieceWidget);
     }
     return Stack(children: pieces);
   }
@@ -256,5 +274,62 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
       
     );
   }
+
+  void onAnimationComplete() {
+    log("Animation completed!" + game.currentPlayer.toString());
+    for(var i = 0; i < 10; i++){
+      for(var j = 0; j < 10; j++){
+        game.board[i][j]?.isAnimated = false;
+      }
+    }
+
+    GamePiece? beatenPiece = game.checkAndRemoveOppBeaten(_postAnimationStartX ,_postAnimationStartY , _postAnimationEndX, _postAnimationEndY, false);
+
+
+    bool newQueen = game.checkForQueenConv();
+
+
+    // Changes player, if futher beat is not possible or there was no beat in the first place
+    if(beatenPiece != null && game.findMovesWhichBeat().getPiece() != null && newQueen == false){
+      game.stateString = 'Spieler $game.currentPlayer bleibt dran';
+    } else {
+      game.currentPlayer = 3 - game.currentPlayer;
+      game.stateString = 'Spieler $game.currentPlayer ist dran';
+    }
+
+    if(game.checkWin()){
+      game.stateString = 'Spieler ${3-game.currentPlayer} hat gewonnen';
+      Future.delayed(Duration(seconds: 5), (){
+        game.resetGame();
+        log("Nach dem Aufruf von DameGame()");
+      });
+    }
+
+    print("Animation completed!");
+
+    if(game.currentPlayer == 2) {
+      log('SIM PC MOVE ${game.currentPlayer}');
+      var dataFromMove = game.simulateComputerMove();
+      _startAnimation(dataFromMove[0], dataFromMove[1], dataFromMove[2], dataFromMove[3]);
+      setAfterAnimationValues(dataFromMove[0], dataFromMove[1], dataFromMove[2], dataFromMove[3]);
+    }
+
+    log(game.board.toString());
+
+    setState(() {
+
+    });
+
+  }
+
+  void setAfterAnimationValues(int startX, int startY, int endX, int endY) {
+    _postAnimationStartX = startX;
+    _postAnimationStartY = startY;
+    _postAnimationEndX = endX;
+    _postAnimationEndY = endY;
+    log('SET VALUES');
+  }
 }
+
+//
 
