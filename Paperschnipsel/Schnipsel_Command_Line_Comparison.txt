@@ -1,0 +1,91 @@
+Flutter Commands
+
+- flutter analyze: Analyzes the dart code of the project, can be helpful no question. The thing is with the linter the issues are displayed in Android Studio in this case. The linter also often offers quick fixes to remove the warnings and dirty code snippets. So overall the linter is probably the tool which is easier to use and has exactly the same functionality as the flutter analyze, which makes the command kind of obsolete.
+
+- flutter create: Creates a new Flutter project in the specified directory.  XXX
+
+- flutter run: Runs your Flutter application on an attached device or in an emulator. XXX
+
+- flutter build: Compiles your application to a native binary or web application. It has subcommands for different platforms:
+        - apk for Android
+        - ios for iOS
+        - web for web applications
+        - appbundle for Android App Bundles
+        - macos, windows, linux for desktop platforms XXX
+
+- flutter test: Runs unit and widget tests in your project.
+
+- flutter doctor: Checks environment which is especially useful for setup and a big strength of flutter compared to frameworks which do not have this command. Something which may be added here is the fact that the command wotks really well and genuinly is a big help. XXX
+
+- flutter pub get: Fetches the packages (dependencies) defined in the pubspec.yaml file for your project. Needed as when the file is updated, the project itself is not automatically updates with it, this command needs to be executed seperatly in addition XXX
+
+- flutter pub add [package]: Adds a package to your pubspec.yaml file and fetches it. Just like the install with npm XXX
+
+- flutter pub remove [package]: Removes a package from your pubspec.yaml file. Just like the uninstall with npm XXX
+
+- flutter clean: Cleans all the files and byproducts generated in the build proccess of the flutter application. Usually after a clean a new flutter pub get is run.
+
+- flutter update: Updates the flutter SDK XXX
+
+- flutter attach: Attaches the command line to a running application to use it in there
+
+- flutter devices: Lists all connected devices that can run a Flutter app. Was never used here as Android Studio has a display for that
+
+- flutter emulators: Manages available emulators. Can list, launch, and create emulators. Again Android Studio has something there
+
+- flutter config: Displays the current Flutter configuration and allows you to change global settings. There are a bunch of settings in order to adjust the project to your preferences, like en- or disableing support for certain plattforms for example. XXX
+
+- Less used commands which may be useful could be flutter logs to see logs for the running application in the terminal and flutter screenshot to take a screenshot from a connected device.
+
+React Native Commands
+
+- npx react-native init ProjectName: Creates project with the name ProjectName XXX
+
+- npx react-native run-android: Runs Android XXX
+
+- npx react-native run-ios: Runs IOS XXX
+
+- npx react-native start: Start Metro bundler, which is needed to load JS Code into the application XXX
+
+- npx react-native log-android: Displays Android logs XXX
+
+- npx react-native log-ios: Displays IOS logs XXX
+
+- npx react-native reload: Used to do hot reload
+
+- npx react-native restart: Used for hot restart
+
+- npm test: Runs test runner for the project
+
+- npm run lint: Runs linter for JS Code
+
+- npm install <package> or yarn add <package>: Install packages XXX
+
+- npm uninstall <package> or yarn remove <package>: Uninstall packages XXX
+
+- npx react-native upgrade: Upgrades React Native version to latest stable XXX
+
+But it must be said, in a React Native context additional tools and commands are used very often. This is not covered here for obvious reasons.
+
+Expo Commands
+
+As the Expo environment is used in this thesis, there will be some talk regarding the Expo CLI too. Although it must be added, that the Expo CLI was not used for these applications it may well be worth a look at. Nerver theless the Expo commands can be used in the project just in a slightly different way, with and npx prefix.
+
+- expo init ProjectName: Creates project XXX
+
+- expo config --type public: Displays project configuration XXX
+
+- expo start: Starts The Expo server XXX
+
+- expo upgrade: Upgrades the Expo SDK XXX
+
+- expo build:android: Build Android application XXX
+
+- expo build:ios: Build IOS application XXX
+
+- expo eas:build: Build application for IOS and Android XXX
+
+- expo doctor: Checks project files for inconsistencies and potential issues. Similar to Flutter doctor but likely not as powerful. The main issue here is the fact that expo doctor only operates within a project, so it can not even do setup things like the flutter doctor is capable of doing XXX
+
+- expo install: Install packages XXX
+

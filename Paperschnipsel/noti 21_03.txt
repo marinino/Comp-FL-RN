@@ -1,0 +1,4 @@
+Hauseigene Flutter Befehle und so shit
+
+min max impl
+alpha beta pruning

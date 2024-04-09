@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { StyleSheet, FlatList, TouchableOpacity, View, Text, Animated, Dimensions } from 'react-native';
+import { StyleSheet, FlatList, TouchableOpacity, View, Text, Animated, Dimensions, Easing } from 'react-native';
 import DameGame from './DameGame'; // Pfad zu Ihrer DameGame-Klasse
 import Piece from './PieceComponent'
 
@@ -8,27 +8,29 @@ const GameBoard = () => {
 
     const [updateCounter, setUpdateCounter] = useState(0);
     const [updateCounter2, setUpdateCounter2] = useState(0);
+    const [updateCounter3, setUpdateCounter3] = useState(0);
     const [forceRerenderZIndex, setForceRerenderZIndex] = useState(0);
     const [animatedPieceId, setAnimatedPieceId] = useState(null);
-    const [animatedPiece, setAnimatedPiece] = useState(null);
+    const [animatedPiece, setAnimatedPiece] = useState(0);
 
 
     const [isInitialized, setIsInitialized] = useState(false);
     const squareSize = (Dimensions.get('window').width) / 10; // Assuming a square board for simplicity
 
-    const forceUpdateZIndex = (pieceId) => {
-      setAnimatedPiece()
-      console.log('UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUPPPPPPPPPPPPPPPPPPPPPPDDDDDDDDDDDDDDDDDDDDDDDAAAAAAAAAAAAAAATTTTE')
+    const forceUpdateZIndex = () => {
+      setAnimatedPiece(animatedPiece + 1)
     };
 
     const forceUpdate = () => {
       setUpdateCounter(updateCounter + 1);
-      console.log('UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUPPPPPPPPPPPPPPPPPPPPPPDDDDDDDDDDDDDDDDDDDDDDDAAAAAAAAAAAAAAATTTTE')
     };
 
     const forceUpdate2 = () => {
       setUpdateCounter2(updateCounter2 - 1);
-      console.log('UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUPPPPPPPPPPPPPPPPPPPPPPDDDDDDDDDDDDDDDDDDDDDDDAAAAAAAAAAAAAAATTTTE')
+    };
+
+    const forceUpdate3 = () => {
+        setUpdateCounter3(updateCounter3 + 1);
     };
 
     const handlePress = async (row, column) => {
@@ -36,22 +38,23 @@ const GameBoard = () => {
       // Beispiel: Wenn ein Spieler einen Stein ausgewählt hat und nun ein Ziel auswählt
       // game.movePiece(startRow, startCol, row, col);
       //setAnimatedPieceId(`${row}-${column}`)
+
+
       await game.handlePressDeep(row, column)
 
-      console.log('HandlePress is DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDONE')
+
         //HIII
       setGame(game)
       forceUpdate(); // Dies wird die Komponente dazu bringen, sich neu zu rendern
+      console.log(`Try computer move` , game.currentPlayer)
 
-      if(game.currentPlayer == 2){
-        console.log('SIM PC MOVE')
-        await game.simulateComputerMove();
-        console.log('PC MOVE ENDED')
-        console.log(game.board, game.stateString)
+      while(game.currentPlayer == 2 && !game.checkWin()){
+        console.log(`Try computer move`)
+        await game.simulateComputerMoveWithMiniMax();
         setGame(game)
         forceUpdate2(); // Dies wird die Komponente dazu bringen, sich neu zu rendern
       }
-
+      forceUpdate3();
 
     };
 
@@ -77,41 +80,98 @@ const GameBoard = () => {
   };
 });
 
-    const renderPieces = () => {
+const renderUnanimatedPieces = () => {
 
-        console.log('RENDERING PIECESr')
-      return game.board.flatMap((row, rowIndex) =>
-        row.map((piece, colIndex) => {
+  let staticPieces = [];
 
-            if (!piece) return null; // Skip empty squares
 
-            // Determine if this piece is the one being animated
-            const isAnimating = piece.isAnimated;
-            if(isAnimating){
-                forceUpdateZIndex(piece.pieceId)
-            }
-            const pieceZIndex = isAnimating ? 1000 : 1; // Elevated zIndex for the animating piece
+  game.board.forEach((row, rowIndex) => {
+    row.forEach((piece, colIndex) => {
+      if (!piece) return; // Skip empty squares
+      if (piece.isAnimated) return;  // Only render static
 
-            console.log(pieceZIndex)
 
-            const animatedStyle = {
-              transform: [
-                { translateX: game.pieceAnimatedValues[piece.pieceId].x},
-                { translateY: game.pieceAnimatedValues[piece.pieceId].y},
-              ],
-              zIndex: pieceZIndex,
-            };
 
-            piece.isAnimated = false
-            return (
+      const animatedStyle = {
+        width: '10%',
+        height: (Dimensions.get('window').width) / 10,
+        position: 'absolute',
+        pointerEvents: 'none',
+        transform: [
+          { translateX: game.pieceAnimatedValues[piece.pieceId].x },
+          { translateY: game.pieceAnimatedValues[piece.pieceId].y },
+        ],
 
-              <Animated.View key={`${rowIndex}-${colIndex}`} style={[styles.piece, animatedStyle]}>
-                <Piece id={piece.pieceId} playerID={piece.playerId} isQueen={piece.isQueen} position={new Animated.ValueXY({x: (game.pieceAnimatedValues[piece.pieceId].x), y: (game.pieceAnimatedValues[piece.pieceId].y)})}/>
-              </Animated.View>
-            );
-        }).filter(Boolean)
+
+      };
+
+
+
+      const pieceElement = (
+        <Animated.View key={`${rowIndex}-${colIndex}`} style={animatedStyle}>
+          <Piece id={piece.pieceId} playerID={piece.playerId} isQueen={piece.isQueen} position={new Animated.ValueXY({x: game.pieceAnimatedValues[piece.pieceId].x, y: game.pieceAnimatedValues[piece.pieceId].y})} />
+        </Animated.View>
       );
-    };
+
+
+      staticPieces.push(pieceElement);
+
+    });
+  });
+
+
+
+  // Render static pieces first, then animated pieces to ensure animated pieces are on top
+  return [staticPieces];
+};
+
+const renderAnimatedPieces = () => {
+
+  let animatedPieces = [];
+
+
+  game.board.forEach((row, rowIndex) => {
+    row.forEach((piece, colIndex) => {
+      if (!piece) return; // Skip empty squares
+      if (!piece.isAnimated) return // Only render animated
+
+      forceUpdateZIndex()
+
+      const animatedStyle = {
+        width: '10%',
+        height: (Dimensions.get('window').width) / 10,
+        position: 'absolute',
+        pointerEvents: 'none',
+        transform: [
+          { translateX: game.pieceAnimatedValues[piece.pieceId].x },
+          { translateY: game.pieceAnimatedValues[piece.pieceId].y },
+        ]
+      };
+
+      piece.isAnimated = false
+
+
+
+
+      const pieceElement = (
+        <Animated.View key={`${rowIndex}-${colIndex}`} style={{...animatedStyle, zIndex: 100}}>
+          <Piece id={piece.pieceId} playerID={piece.playerId} isQueen={piece.isQueen} position={new Animated.ValueXY({x: game.pieceAnimatedValues[piece.pieceId].x, y: game.pieceAnimatedValues[piece.pieceId].y})} />
+        </Animated.View>
+      );
+
+      animatedPieces.push(pieceElement);
+      console.log(piece, 'ANIMATED')
+
+    });
+  });
+
+
+
+  // Render static pieces first, then animated pieces to ensure animated pieces are on top
+  console.log(animatedPieces)
+  return [animatedPieces];
+};
+
 
   const renderSquare = ({ item }) => {
     const row = Math.floor(item.id / game.boardSize);
@@ -129,7 +189,9 @@ const GameBoard = () => {
 
                 <TouchableOpacity
                   style={[styles.square, item.isDark ? styles.darkSquare : styles.lightSquare]}
-                  onPress={() => handlePress(row, col)}
+                  onPress={() => {
+                    handlePress(row, col)}
+                  }
                 >
                 </TouchableOpacity>
             )
@@ -139,22 +201,33 @@ const GameBoard = () => {
 
   return (
     <>
-       <View style={styles.gameBoardContainer}>
+       <View style={{ position: 'relative' }}>
+         {/* Game Board */}
          <FlatList
            data={squares}
            renderItem={renderSquare}
            keyExtractor={item => item.id.toString()}
            numColumns={boardSize}
-           scrollEnabled={false} // Optionally disable scrolling if the board should be static
+           scrollEnabled={false}
            style={[styles.board]}
          />
 
-         {renderPieces()}
+         {/* Overlay for Pieces */}
+         <View style={styles.piecesOverlay}>
 
-        <View style={styles.statusContainer}>
-            <Text style={styles.statusText}>{game.stateString}</Text>
-        </View>
+             <View style={{zIndex: 1}}>
+               {renderUnanimatedPieces()}
+             </View>
+             <View style={{zIndex: 2}}>
+                {renderAnimatedPieces()}
+             </View>
+
+         </View>
+         <View style={styles.statusContainer}>
+           <Text style={styles.statusText}>{game.stateString}</Text>
+         </View>
        </View>
+
     </>
   );
 };
@@ -173,17 +246,23 @@ const styles = StyleSheet.create({
   lightSquare: {
     backgroundColor: 'beige',
   },
-  piece: {
-    width: '10%', // Größe des Spielsteins
-    height: (Dimensions.get('window').width)/10,
-    //borderRadius: 50, // Kreisform
+  piecesOverlay: {
     position: 'absolute',
-    //top: 0,
-    //left: 0,
-    pointerEvents: 'none'
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    // Make sure it's above everything in the same stacking context
+
+    pointerEvents: 'box-none',
 
   },
-
+  animatedPieces: {
+    zIndex: 2
+  },
+  unanimatedPieces: {
+    zIndex: 1
+  },
   pieceText: {
     flex: 1,
     fontWeight: 'bold',
