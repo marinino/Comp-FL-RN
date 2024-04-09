@@ -1,12 +1,12 @@
 import GamePiece from './GamePiece'
-import { Animated, Dimensions } from 'react-native';
+import GameBoard from './GameBoard'
+import { Animated, Dimensions, Easing } from 'react-native';
 
 
 export default class DameGame {
 
 
   constructor() {
-    console.log('DAMEGAME')
     this.pieceAnimatedValues = {}
     this.pieceZValues = {}
     this.squareWidth = (Dimensions.get('window').width)/20
@@ -17,24 +17,24 @@ export default class DameGame {
     this.boardSize = 10;
     this.board = Array.from({ length: this.boardSize }, () => Array(this.boardSize).fill(null));
     this.currentPlayer = 1; // 1 für Spieler 1, 2 für Spieler 2
+    this.bestMinimaxMove = new Move(null, -1, -1, -1, -1);
+    this.currentTree = null
 
-    this.board[0][5] = new GamePiece(`${0}-${5}`, 2, false, true);
-    this.board[1][4] = new GamePiece(`${1}-${4}`, 1, false);
-    this.board[1][2] = new GamePiece(`${1}-${2}`, 1, false);
+    this.board[0][1] = new GamePiece(`0-1`, 1, false)
+    this.board[2][3] = new GamePiece(`2-3`, 2, false)
 
     // Initialisieren des Bretts mit Spielsteinen
     for (let row = 0; row < this.boardSize; row++) {
       for (let col = 0; col < this.boardSize; col++) {
         if ((row + col) % 2 === 1) {
           if (row < 4) {
-            //this.board[row][col] = new GamePiece(`${row}-${col}`, 1, false);
+            this.board[row][col] = new GamePiece(`${row}-${col}`, 1, false);
           } else if (row >= 6) {
-            //this.board[row][col] = new GamePiece(`${row}-${col}`, 2, false);
+            this.board[row][col] = new GamePiece(`${row}-${col}`, 2, false);
           }
         }
       }
     }
-    console.log('DAMEGAME')
 
     const initialAnimatedValues = {};
     this.board.forEach((row, rowIndex) => {
@@ -62,9 +62,11 @@ export default class DameGame {
   async movePiece(startRow, startCol, endRow, endCol) {
       // Hier könnten Sie die Logik zum Bewegen der Spielsteine implementieren
       // einschließlich der Überprüfung auf gültige Züge und das Schlagen gegnerischer Steine
+      console.log('ICH HAB DIE RICHTIG GERUFEN')
 
       // Prüfen Sie, ob der Zug gültig ist
       if (!this.isValidMove(startCol, startRow, endCol, endRow)) {
+        console.log('DIS MOVE NOT VALID')
         return false;
       }
 
@@ -72,11 +74,13 @@ export default class DameGame {
       var foundBeatingMove = this.findMovesWhichBeat().getPiece()
       if (beatenPiece == null && foundBeatingMove) {
         this.stateString = `Spieler ${this.currentPlayer} hat die Schlagpflicht verletzt, wähle einen anderen Zug`;
+        console.log('SCHLAGPFLICHT UND SO')
         return false;
       }
 
       if(foundBeatingMove && foundBeatingMove.isQueen && beatenPiece && !beatenPiece.isQueen){
         stateString = 'Dame schlagen geht vor';
+        console.log('DAME SCHLAGEN')
         return false;
       }
 
@@ -85,20 +89,24 @@ export default class DameGame {
       this.board[endRow][endCol] = piece;
       this.board[startRow][startCol] = null;
 
+      console.log('TO DA ANIMATION')
+
 
 
         if(!this.animationRunning){
 
           const animatedValue = this.pieceAnimatedValues[piece.pieceId];
-          console.log('ANIMATION BOUT TO START', animatedValue)
           this.animationRunning = true
           piece.isAnimated = true
 
-          console.log(this.pieceZValues, 'FROM ANIMATE')
+
+
+
           return new Promise((resolve, reject) => {
             Animated.timing(animatedValue, {
                   toValue: { x: endCol * this.squareWidth + this.squareWidth * 0.15 / 2, y: endRow * this.squareWidth + this.squareWidth * 0.15 / 2 }, // You need to convert board positions to screen positions
                   duration: 1000,
+                  easing: Easing.inOut(Easing.ease),
                   useNativeDriver: true,
               }).start(({ finished }) => {
 
@@ -108,19 +116,12 @@ export default class DameGame {
 
                   // Aktualisieren Sie den Zustand, um die UI neu zu rendern
                   this.animationRunning = false
-                  console.log('ANIMATION BOUT ENDED')
 
-
-
-                  const beatenPieceAfterMove: GamePiece | null = this.checkAndRemoveOppBeaten(startCol, startRow, endCol, endRow, false);
-
-
+                  const beatenPiece = this.checkAndRemoveOppBeaten(startCol, startRow, endCol, endRow, false);
                   const newQueen: boolean = this.checkForQueenConv();
 
-
                   // Ändert den Spieler, wenn kein weiterer Schlag möglich ist oder es keinen Schlag gab
-                  if (beatenPieceAfterMove != null && this.findMovesWhichBeat().getPiece() && !newQueen) {
-                    console.log('Player stays')
+                  if (beatenPiece != null && this.findMovesWhichBeat().getPiece() && !newQueen) {
                     this.stateString = `Spieler ${this.currentPlayer} bleibt dran`;
                   } else {
                     this.currentPlayer = 3 - this.currentPlayer;
@@ -135,15 +136,15 @@ export default class DameGame {
                     }, 5000);
                   }
 
-                  console.log('1233456789')
+
+
+
 
 
 
                   if(finished){
-                        console.log('Animation completed')
                         resolve();
                   } else {
-                      console.log('Animation interrupted');
                       // Handle interruption or rejection
                       reject(new Error('Animation was interrupted'));
                   }
@@ -179,8 +180,9 @@ export default class DameGame {
         return;
       }
       else {
-        console.log('Tried to call move');
         returnedDataFromMove = await this.movePiece(this.selectedY, this.selectedX, row, column);
+
+
 
         this.selectedX = -1;
         this.selectedY = -1;
@@ -188,7 +190,16 @@ export default class DameGame {
       return returnedDataFromMove
   }
 
-  checkAndRemoveOppBeaten(startX: number, startY: number, endX: number, endY: number, simulate: boolean): GamePiece | null {
+  checkAndRemoveOppBeaten(startX: number, startY: number, endX: number, endY: number, simulate: boolean, pBoard: number[][], pPlayerId: number): GamePiece | null {
+
+      let board = this.board
+      if(pBoard){
+          board = pBoard
+      }
+      let playerId = this.currentPlayer
+      if(pPlayerId){
+          playerId = pPlayerId
+      }
       let beatenPiece: GamePiece | null = null;
 
       // Nur wenn keine Felder übersprungen wurden, konnte niemand geschlagen werden
@@ -199,16 +210,25 @@ export default class DameGame {
 
       const jumpedFields: number[][] = this.getJumpedFields(startX, startY, endX, endY);
 
+
       jumpedFields.forEach((element) => {
-        if (this.board[element[1]][element[0]]?.playerId !== this.currentPlayer) {
-          beatenPiece = this.board[element[1]][element[0]];
+        //console.log('THIS FIELD WAS JUMPED', board[element[1]][element[0]], playerId, element[1], element[0])
+        if (board[element[1]][element[0]]?.playerId !== playerId) {
+          //console.log('GOT IF FOR SOME REASON')
+          beatenPiece = board[element[1]][element[0]];
           if (!simulate) {
-            this.board[element[1]][element[0]] = null;
+
+
+                    board[element[1]][element[0]] = null;
+
+
+
+
           }
         }
       });
-
-      return beatenPiece;
+      //console.log(beatenPiece, 'BEATENPIECE RETURN VALUE')
+      return beatenPiece
     }
 
     getJumpedFields(startX: number, startY: number, endX: number, endY: number): number[][] {
@@ -233,8 +253,22 @@ export default class DameGame {
        return visitedFields;
      }
 
-    isValidMove(startX: number, startY: number, endX: number, endY: number): boolean {
+    isValidMove(startX: number, startY: number, endX: number, endY: number, pBoard: number[][], playerOnTheMove: number): boolean {
         // ... Ihre Logik, um zu prüfen, ob ein Zug gültig ist ...
+
+        //console.log('Is valid move is called')
+
+        var board = this.board
+        if(pBoard){
+            board = pBoard
+        }
+
+        var currentPlayer = this.currentPlayer
+        if(playerOnTheMove){
+            currentPlayer = playerOnTheMove
+        }
+
+
 
         if(startX < 0 || startX > 9 ||startY < 0 || startY > 9 || endX < 0 || endX > 9 ||endY < 0 || endY > 9){
             return false
@@ -244,72 +278,79 @@ export default class DameGame {
         const jumpedFields: number[][] = this.getJumpedFields(startX, startY, endX, endY);
 
         // Überprüfen, ob das Zielfeld frei ist
-        if (this.board[endY][endX] !== null) {
+        if (board[endY][endX] !== null) {
+          //console.log('VALID MOVE FEHLERCODE 1')
           this.stateString = 'Der Zielort muss ein freies Feld sein';
           return false;
         }
 
         // Überprüfen, ob nur diagonale Züge gemacht werden
         if (startX === endX || startY === endY) {
+          //console.log('VALID MOVE FEHLERCODE 2')
           this.stateString = 'Es sind nur diagonale Züge erlaubt';
           return false;
         }
 
         // Überprüfen, ob der Sprung gleich weit in X und Y ist
         if (Math.abs(startX - endX) !== Math.abs(startY - endY)) {
+          //console.log('VALID MOVE FEHLERCODE 3')
           this.stateString = 'Es sind nur diagonale Züge erlaubt';
           return false;
         }
 
         jumpedFields.forEach((element) => {
-          if (this.board[element[1]][element[0]]?.playerId == this.currentPlayer) {
+          if (board[element[1]][element[0]]?.playerId == currentPlayer) {
             jumpedOwnPiecesOrAir = true;
           }
         });
         // Need that for own pieces because Flutter FTW
         // Not jumping over a empty tile or a own piece
         if(jumpedOwnPiecesOrAir){
+          //console.log('VALID MOVE FEHLERCODE 4')
           this.stateString = 'Man darf nur über Steine des Gegners springen Test';
           return false;
         }
 
         // FOR NON QUEENS
-        if((this.board[startY][startX] != null && (!this.board[startY][startX]!.isQueen))){
+        if((board[startY][startX] != null && (!board[startY][startX]!.isQueen))){
           //If you try to move backwards
-          if(((endY < startY) && this.currentPlayer == 1) || ((endY > startY) && this.currentPlayer == 2)){
+          if(((endY < startY) && currentPlayer == 1) || ((endY > startY) && currentPlayer == 2)){
+            //console.log('VALID MOVE FEHLERCODE 5')
             this.stateString = 'Rückwärts laufen ist nur mit Damen erlaubt';
             return false;
           }
 
           // If the piece is not a queen it can not jump more than two
-          if(this.board[startY][startX] != null && (!this.board[startY][startX]!.isQueen) && Math.abs(startX - endX) > 2){
+          if(board[startY][startX] != null && (!board[startY][startX]!.isQueen) && Math.abs(startX - endX) > 2){
+            //console.log('VALID MOVE FEHLERCODE 6')
             this.stateString = 'Normale Steine können maximal zwei Felder springen';
             return false;
           }
 
           jumpedFields.forEach((element) => {
-            if(this.board[element[1]][element[0]] == null){
+            if(board[element[1]][element[0]] == null){
               jumpedOwnPiecesOrAir = true;
             }
           });
           // Need that for own pieces because Flutter FTW
           // Not jumping over a empty tile or a own piece
           if(jumpedOwnPiecesOrAir){
+            //console.log('VALID MOVE FEHLERCODE 7')
             this.stateString = 'Man darf nur über Steine des Gegners springen';
             return false;
           }
         // FOR QUEENS
-        } else if((this.board[startY][startX] != null && (this.board[startY][startX]!.isQueen))){
+        } else if((board[startY][startX] != null && (board[startY][startX]!.isQueen))){
           // Queen must be surrounded by enemy piece
 
           var counterOfOpponentPieces = 0;
           var foundOwnPiece = false;
 
           jumpedFields.forEach((element) => {
-            if(this.board[element[1]][element[0]]?.playerId == (3 - this.currentPlayer)){
+            if(board[element[1]][element[0]]?.playerId == (3 - currentPlayer)){
               counterOfOpponentPieces++;
             }
-            if(this.board[element[1]][element[0]]?.playerId == this.currentPlayer){
+            if(board[element[1]][element[0]]?.playerId == currentPlayer){
               foundOwnPiece = true;
             }
           })
@@ -323,28 +364,33 @@ export default class DameGame {
             return false;
           }
 
-          if((endY - 1 >= 0 && endX - 1 >= 0 && this.board[endY - 1][endX - 1]?.playerId != (3 - this.currentPlayer)) &&
-              (endY - 1 >= 0 && endX + 1 < 10 && this.board[endY - 1][endX + 1]?.playerId != (3 - this.currentPlayer)) &&
-              (endY + 1 < 10 && endX - 1 >= 0 && this.board[endY + 1][endX - 1]?.playerId != (3 - this.currentPlayer)) &&
-              (endY + 1 < 10 && endX + 1 < 10 && this.board[endY + 1][endX + 1]?.playerId != (3 - this.currentPlayer)) &&
-              this.checkAndRemoveOppBeaten(startX, startY, endX, endY, true) != null){
+          if((endY - 1 >= 0 && endX - 1 >= 0 && board[endY - 1][endX - 1]?.playerId != (3 - currentPlayer)) &&
+              (endY - 1 >= 0 && endX + 1 < 10 && board[endY - 1][endX + 1]?.playerId != (3 - currentPlayer)) &&
+              (endY + 1 < 10 && endX - 1 >= 0 && board[endY + 1][endX - 1]?.playerId != (3 - currentPlayer)) &&
+              (endY + 1 < 10 && endX + 1 < 10 && board[endY + 1][endX + 1]?.playerId != (3 - currentPlayer)) &&
+              this.checkAndRemoveOppBeaten(startX, startY, endX, endY, true, board, currentPlayer) != null){
             this.stateString = 'Die Dame muss direkt um einen Gegner herum landen';
             return false;
           }
         }
         // IF ELIMINATION HAPPENS NO NEED TO CHECK IF MOVE IS VALID
-        if(this.checkAndRemoveOppBeaten(startX, startY, endX, endY, true) != null){
+        if(this.checkAndRemoveOppBeaten(startX, startY, endX, endY, true, board, currentPlayer) != null){
           return true;
         }
 
         return true; // Ändern Sie dies, um die tatsächliche Prüfung widerzuspiegeln
     }
 
-    checkWin(): boolean {
+    checkWin(board: number[][]): boolean {
         let foundWhite = false;
         let foundBlack = false;
 
-        this.board.forEach((row) => {
+        var board = this.board
+        if(board){
+            board = board
+        }
+
+        board.forEach((row) => {
           row.forEach((cell) => {
             if (cell?.playerId === 1) {
               foundWhite = true;
@@ -358,7 +404,6 @@ export default class DameGame {
 
 
         if (!(foundBlack && foundWhite)) {
-          console.log('GAME OVER, SOMEBODY WON');
         }
 
         return !(foundBlack && foundWhite);
@@ -386,23 +431,38 @@ export default class DameGame {
         return false;
       }
 
-  findMovesWhichBeat(): Move {
+  findMovesWhichBeat(pBoard: number[][], playerOnTheMove: number): Move {
+
+      let board = this.board
+      if(pBoard){
+          board = pBoard
+      }
+
+      //console.log(board)
+
+      var currentPlayer = this.currentPlayer
+      if(playerOnTheMove){
+          currentPlayer = playerOnTheMove
+      }
+
+      //console.log(currentPlayer)
 
       var returnMove = new Move(null, -1, -1, -1, -1);
       // Überprüfen, ob eine Eliminierung möglich ist
-        for(elementRow of this.board){
+        for(elementRow of board){
           for(elementItem of elementRow){
-            if (elementItem && elementItem.playerId === this.currentPlayer) {
-              const rowIndex = this.board.indexOf(elementRow);
+            //console.log('WHAT IS DIS????', elementItem, 'ON')
+            if (elementItem && elementItem.playerId === currentPlayer) {
+              const rowIndex = board.indexOf(elementRow);
               const itemIndex = elementRow.indexOf(elementItem);
-
-              if(!this.board[rowIndex][itemIndex].isQueen){
+              //console.log(rowIndex, itemIndex)
+              if(!board[rowIndex][itemIndex].isQueen){
                 // Teste verschiedene Richtungen
 
                 if (rowIndex + 2 < 10 && itemIndex + 2 < 10) {
                   if (this.isValidMove(itemIndex, rowIndex, itemIndex + 2, rowIndex + 2)) {
 
-                      var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex + 2, rowIndex + 2, true)
+                      var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex + 2, rowIndex + 2, true, board, currentPlayer)
                       var returnedPiece = this.checkToChangeReturningPiece(returnMove.getPiece(), tempPiece);
                       if(returnedPiece != null && returnedPiece.isQueen){
                         return new Move(returnedPiece, itemIndex + 2, rowIndex + 2, itemIndex, rowIndex);
@@ -414,7 +474,7 @@ export default class DameGame {
 
                 if (rowIndex + 2 < 10 && itemIndex - 2 >= 0) {
                   if (this.isValidMove(itemIndex, rowIndex, itemIndex - 2, rowIndex + 2)) {
-                     var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex - 2, rowIndex + 2, true)
+                     var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex - 2, rowIndex + 2, true, board, currentPlayer)
                      var returnedPiece = this.checkToChangeReturningPiece(returnMove.getPiece(), tempPiece);
                      if(returnedPiece != null && returnedPiece.isQueen){
                          return new Move(returnedPiece, itemIndex - 2, rowIndex + 2, itemIndex, rowIndex);
@@ -425,7 +485,7 @@ export default class DameGame {
                 }
                 if (rowIndex - 2 >= 0 && itemIndex - 2 >= 0) {
                   if (this.isValidMove(itemIndex, rowIndex, itemIndex - 2, rowIndex - 2)) {
-                    var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex - 2, rowIndex - 2, true)
+                    var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex - 2, rowIndex - 2, true, board, currentPlayer)
                     var returnedPiece = this.checkToChangeReturningPiece(returnMove.getPiece(), tempPiece);
                     if(returnedPiece != null && returnedPiece.isQueen){
                       return new Move(returnedPiece, itemIndex - 2, rowIndex - 2, itemIndex, rowIndex);
@@ -436,7 +496,7 @@ export default class DameGame {
                 }
                 if (rowIndex - 2 >= 0 && itemIndex + 2 < 10) {
                   if (this.isValidMove(itemIndex, rowIndex, itemIndex + 2, rowIndex - 2)) {
-                    var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex + 2, rowIndex - 2, true)
+                    var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex + 2, rowIndex - 2, true, board, currentPlayer)
                     var returnedPiece = this.checkToChangeReturningPiece(returnMove.getPiece(), tempPiece);
                     if(returnedPiece != null && returnedPiece.isQueen){
                       return new Move(returnedPiece, itemIndex + 2, rowIndex - 2, itemIndex, rowIndex);
@@ -450,7 +510,7 @@ export default class DameGame {
                   for(var i = 2; i < 10; i++){
                       if((rowIndex + i) < 10 && (itemIndex + i) < 10 && !returnMove.getPiece()){
                           if (this.isValidMove(itemIndex, rowIndex, itemIndex + i, rowIndex + i)) {
-                            var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex + i, rowIndex + i, true)
+                            var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex + i, rowIndex + i, true, board, currentPlayer)
                             var returnedPiece = this.checkToChangeReturningPiece(returnMove.getPiece(), tempPiece);
                             if(returnedPiece != null && returnedPiece.isQueen){
                               return new Move(returnedPiece, itemIndex + i, rowIndex + i, itemIndex, rowIndex);
@@ -461,7 +521,7 @@ export default class DameGame {
                       }
                       if((rowIndex - i) >= 0 && (itemIndex - i) >= 0 && !returnMove.getPiece()){
                           if (this.isValidMove(itemIndex, rowIndex, itemIndex - i, rowIndex - i)) {
-                            var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex - i, rowIndex - i, true)
+                            var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex - i, rowIndex - i, true, board, currentPlayer)
                             var returnedPiece = this.checkToChangeReturningPiece(returnMove.getPiece(), tempPiece);
                             if(returnedPiece != null && returnedPiece.isQueen){
                               return new Move(returnedPiece, itemIndex - i, rowIndex - i, itemIndex, rowIndex);
@@ -473,7 +533,7 @@ export default class DameGame {
 
                       if((rowIndex - i) >= 0 && (itemIndex + i) < 10 && !returnMove.getPiece()){
                           if (this.isValidMove(itemIndex, rowIndex, itemIndex + i, rowIndex - i)) {
-                            var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex + i, rowIndex - i, true)
+                            var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex + i, rowIndex - i, true, board, currentPlayer)
                             var returnedPiece = this.checkToChangeReturningPiece(returnMove.getPiece(), tempPiece);
                             if(returnedPiece != null && returnedPiece.isQueen){
                               return new Move(returnedPiece, itemIndex + i, rowIndex - i, itemIndex, rowIndex);
@@ -485,7 +545,7 @@ export default class DameGame {
 
                       if((rowIndex + i) < 10 && (itemIndex - i) >= 0 && !returnMove.getPiece()){
                           if (this.isValidMove(itemIndex, rowIndex, itemIndex - i, rowIndex + i)) {
-                            var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex - i, rowIndex + i, true)
+                            var tempPiece = this.checkAndRemoveOppBeaten(itemIndex, rowIndex, itemIndex - i, rowIndex + i, true, board, currentPlayer)
                             var returnedPiece = this.checkToChangeReturningPiece(returnMove.getPiece(), tempPiece);
                             if(returnedPiece != null && returnedPiece.isQueen){
                               return new Move(returnedPiece, itemIndex - i, rowIndex + i, itemIndex, rowIndex);
@@ -499,6 +559,7 @@ export default class DameGame {
             }
           }
         }
+        //console.log(returnMove)
         return returnMove;
     };
 
@@ -545,6 +606,7 @@ export default class DameGame {
                           for(const piece in this.board[row]){
                               // finds 'ideal' piece to move, returns null if no piece beats
                               const optimalMove = this.findMovesWhichBeat();
+                              //console.log('Optimal move', optimalMove)
                               // Makes ideal move if possible
                               if(optimalMove.getPiece() != null){
                                   await this.movePiece(optimalMove.getStartY(), optimalMove.getStartX(), optimalMove.getEndY(), optimalMove.getEndX())
@@ -574,12 +636,14 @@ export default class DameGame {
                                                   (i-2 >= 0 && (!this.board[i-2][j] || this.board[i-2][j].playerId == 2)) &&
                                                   (i-2 >= 0 && j+2 <= 9 && (!this.board[i-2][j+2] || this.board[i-2][j+2].playerId == 2))){
                                               await this.movePiece(i, j, i-1, j+1)
+
                                               resolve();
                                               return;
                                           } else if(i-1 >= 0 && j-1 >= 0 && !this.board[i-1][j-1] &&
                                                   (i-2 >= 0 && (!this.board[i-2][j] || this.board[i-2][j].playerId == 2)) &&
                                                   (i-2 >= 0 && j-2 >= 0 && (!this.board[i-2][j-2] || this.board[i-2][j-2].playerId == 2))){
                                               await this.movePiece(i, j, i-1, j-1)
+
                                               resolve();
                                               return;
                                           }
@@ -593,10 +657,12 @@ export default class DameGame {
                                       if(this.board[i][j] && this.board[i][j].playerId == 2 && !this.board[i][j].isQueen){
                                           if(i-1 >= 0 && j+1 <= 9 && !this.board[i-1][j+1]){
                                               await this.movePiece(i, j, i-1, j+1)
+
                                               resolve();
                                               return;
                                           } else if(i-1 >= 0 && j-1 >= 0 && !this.board[i-1][j-1]){
                                               await this.movePiece(i, j, i-1, j-1)
+
                                               resolve();
                                               return;
                                           }
@@ -608,35 +674,32 @@ export default class DameGame {
                               for(var i = 0; i <= 8; i++){
                                   for(var j = 0; j <= 9; j++){
                                       if(this.board[i][j] && this.board[i][j].playerId == 2 && this.board[i][j].isQueen){
-                                          console.log('FOUND PC STONE AT: ', i, j)
                                           for(var k = 1; k <= 9; k++){
 
-                                                  console.log('SURROUNDED BY DANGER!!!!!?????????? - +')
                                                   if(this.isValidMove(j, i, j+k, i-k) && !this.surroundedByDanger(i-k, j+k, i, j)){
-                                                      console.log('TOP RIGHT LETS GO', i, j, i-k, j+k, 'THIS IS CURRENT K', k)
                                                       await this.movePiece(i, j, i-k, j+k)
-                                                      console.log('MOVE DUN DUN')
+
                                                       resolve();
                                                       return;
                                                   }
 
-                                                  console.log('SURROUNDED BY DANGER!!!!!?????????? - -')
                                                   if(this.isValidMove(j, i, j-k, i-k) && !this.surroundedByDanger(i-k, j-k, i, j)){
                                                       await this.movePiece(i, j, i-k, j-k)
+
                                                       resolve();
                                                       return;
                                                   }
 
-                                                  console.log('SURROUNDED BY DANGER!!!!!?????????? + -')
                                                   if(this.isValidMove(j, i, j-k, i+k) && !this.surroundedByDanger(i+k, j-k, i, j)){
                                                       await this.movePiece(i, j, i+k, j-k)
+
                                                       resolve();
                                                       return;
                                                   }
 
-                                                  console.log('SURROUNDED BY DANGER!!!!!?????????? + +')
                                                   if(this.isValidMove(j, i, j+k, i+k) && !this.surroundedByDanger(i+k, j+k, i, j)){
                                                       await this.movePiece(i, j, i+k, j+k)
+
                                                       resolve();
                                                       return;
                                                   }
@@ -653,18 +716,22 @@ export default class DameGame {
                                           for(var k = 1; i+k <= 9 || i-k >= 0 || j+k <= 9 || j-k >= 0; k++){
                                               if(i-k >= 0 && j+k <= 9 && !this.board[i-k][j+k]){
                                                   await this.movePiece(i, j, i-k, j+k)
+
                                                   resolve();
                                                   return;
                                               } else if(i-k >= 0 && j-k >= 0 && !this.board[i-k][j-k]){
                                                   await this.movePiece(i, j, i-k, j-k)
+
                                                   resolve();
                                                   return;
                                               } else if(i+k <= 9 && j-k >= 0 && !this.board[i+k][j-k]){
                                                   await this.movePiece(i, j, i+k, j-k)
+
                                                   resolve();
                                                   return;
                                               } else if(i+k <= 9 && j+k <= 9 && !this.board[i+k][j+k]){
                                                   await this.movePiece(i, j, i+k, j+k)
+
                                                   resolve();
                                                   return;
                                               }
@@ -679,10 +746,12 @@ export default class DameGame {
                                   if(this.board[9][i] && this.board[9][i].playerId == 2){
                                       if(i+1 <= 9 && !this.board[8][i+1]){
                                           await this.movePiece(9, i, 8, i+1)
+
                                           resolve();
                                           return;
                                       } else if(i+1 >= 0 && !this.board[8][i-1]){
                                           await this.movePiece(9, i, 8, i-1)
+
                                           resolve();
                                           return;
                                       }
@@ -705,7 +774,6 @@ export default class DameGame {
 
   surroundedByDanger(rowIndex: int, columnIndex: int, startRow: int, startColumn: int): boolean {
 
-    console.log(rowIndex, columnIndex, 'ALARM')
 
     // Checks if piece is could be normally beaten
     if(columnIndex + 1 <= 9 && rowIndex - 1 >= 0 && this.board[rowIndex - 1][columnIndex + 1] &&
@@ -713,7 +781,6 @@ export default class DameGame {
             !this.board[rowIndex - 1][columnIndex + 1].isQueen &&
             columnIndex - 1 >= 0 && rowIndex + 1 <= 9 &&
             (!this.board[rowIndex + 1][columnIndex - 1] || (rowIndex + 1 == startRow && columnIndex - 1 == startColumn))){
-        console.log('WE HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
         return true;
 
     }else if(columnIndex - 1 >= 0 && rowIndex - 1 >= 0 && this.board[rowIndex - 1][columnIndex - 1] &&
@@ -721,7 +788,6 @@ export default class DameGame {
             !this.board[rowIndex - 1][columnIndex - 1].isQueen &&
             columnIndex + 1 <= 9 && rowIndex + 1 <= 9 &&
              (!this.board[rowIndex + 1][columnIndex + 1] || (rowIndex + 1 == startRow && columnIndex + 1 == startColumn))){
-            console.log('WE HERE')
         return true;
     }
 
@@ -737,39 +803,31 @@ export default class DameGame {
     }
 
     for(var k = 1; k + maxIndex <= 9; k++){
-        console.log(k, 'BIG OL K', maxIndex)
         if(0 <= rowIndex + k && rowIndex + k <= 9 && 0 <= columnIndex + k && columnIndex + k <= 9
                 && rowIndex + k != startRow && columnIndex + k != startColumn
                 && this.board[rowIndex + k][columnIndex + k]
                 && this.board[rowIndex + k][columnIndex + k].playerId == (3-this.currentPlayer)
                 && this.board[rowIndex + k][columnIndex + k].isQueen
                 && !pieceFoundDownRight){
-            console.log('Found queen which could beat at ', rowIndex + k, columnIndex + k)
             return true
         } else if(0 <= rowIndex + k && rowIndex + k <= 9 && 0 <= columnIndex + k && columnIndex + k <= 9
                 && rowIndex + k != startRow && columnIndex + k != startColumn
                 && this.board[rowIndex + k][columnIndex + k]){
-            console.log('Found piece at ', rowIndex + k, columnIndex + k)
             pieceFoundDownRight = true;
         } else {
-            console.log('NO DANGER FOUND AT', rowIndex + k, columnIndex + k)
         }
-        console.log(9 >= (rowIndex - k) >= 0)
         if(9 >= rowIndex - k && rowIndex - k >= 0 && 0 <= columnIndex + k && columnIndex + k <= 9
                 && rowIndex - k != startRow && columnIndex + k != startColumn
                 && this.board[rowIndex - k][columnIndex + k]
                 && this.board[rowIndex - k][columnIndex + k].playerId == (3-this.currentPlayer)
                 && this.board[rowIndex - k][columnIndex + k].isQueen
                 && !pieceFoundUpRight){
-                console.log('Found queen which could beat at ', rowIndex - k, columnIndex + k)
             return true
         } else if(9 >= rowIndex - k && rowIndex - k >= 0 && 0 <= columnIndex + k && columnIndex + k <= 9
                 && rowIndex - k != startRow && columnIndex + k != startColumn
                 && this.board[rowIndex - k][columnIndex + k]){
-                console.log('Found piece at ', rowIndex - k, columnIndex + k)
             pieceFoundUpRight = true;
         } else {
-            console.log('NO DANGER FOUND', rowIndex - k, columnIndex + k)
         }
 
         if(0 <= rowIndex + k && rowIndex + k <= 9 && 9 >= columnIndex - k && columnIndex - k >= 0
@@ -778,15 +836,12 @@ export default class DameGame {
                     && this.board[rowIndex + k][columnIndex - k].playerId == (3-this.currentPlayer)
                     && this.board[rowIndex + k][columnIndex - k].isQueen
                     && !pieceFoundDownLeft){
-                    console.log('Found queen which could beat at ', rowIndex + k, columnIndex - k)
             return true
         } else if(0 <= rowIndex + k && rowIndex + k <= 9 && 9 >= columnIndex - k && columnIndex - k >= 0
                 && rowIndex + k != startRow && columnIndex - k != startColumn
                 && this.board[rowIndex + k][columnIndex - k]){
             pieceFoundDownLeft = true;
-            console.log('Found piece at ', rowIndex + k, columnIndex - k)
         } else {
-            console.log('NO DANGER FOUND', rowIndex + k, columnIndex - k)
         }
 
         if(9 >= rowIndex - k && rowIndex - k >= 0 && 9 >= columnIndex - k && columnIndex - k >= 0
@@ -795,21 +850,411 @@ export default class DameGame {
                 && this.board[rowIndex - k][columnIndex - k].playerId == (3-this.currentPlayer)
                 && this.board[rowIndex - k][columnIndex - k].isQueen
                 && !pieceFoundUpLeft){
-                console.log('Found queen which could beat at ', rowIndex - k, columnIndex - k)
             return true
         } else if(9 >= rowIndex - k && rowIndex - k >= 0 && 9 >= columnIndex - k && columnIndex - k >= 0
                 && rowIndex - k != startRow && columnIndex - k != startColumn
                 && this.board[rowIndex - k][columnIndex - k]){
-                console.log('Found piece at ', rowIndex - k, columnIndex - k)
             pieceFoundUpLeft = true;
         } else {
-            console.log('NO DANGER FOUND', rowIndex - k, columnIndex - k)
         }
     }
 
-    console.log('OUT OF FOR')
     return false;
   }
+
+  async simulateComputerMoveWithMiniMax(){
+        return new Promise(async (resolve, reject) => {
+            try{
+                // Find moves which beat mit jedem Stein
+                const optimalMove = this.findMovesWhichBeat();
+                console.log('Optimal move', optimalMove)
+                // Makes ideal move if possible
+                if(optimalMove.getPiece() != null){
+                    await this.movePiece(optimalMove.getStartY(), optimalMove.getStartX(), optimalMove.getEndY(), optimalMove.getEndX())
+                    resolve();
+                    return;
+                } else {
+                    var boardCopy = this.board.map(row => [...row])
+                    let minimaxRes = this.minimax(boardCopy, 3, -Infinity, Infinity, true, [])
+                    console.log(minimaxRes, ' is FINAL RESULT')
+                    for(node in minimaxRes.path){
+                        console.log(minimaxRes.path[node].getPiece())
+                    }
+                    console.log(minimaxRes, ' is FINAL RESULT', minimaxRes.path[minimaxRes.path.length - 1].getStartY(), minimaxRes.path[minimaxRes.path.length - 1].getStartX()
+                        , minimaxRes.path[minimaxRes.path.length - 1].getEndY(), minimaxRes.path[minimaxRes.path.length - 1].getEndX())
+                    await this.movePiece(minimaxRes.path[minimaxRes.path.length - 1].getStartY(), minimaxRes.path[minimaxRes.path.length - 1].getStartX(),
+                        minimaxRes.path[minimaxRes.path.length - 1].getEndY(), minimaxRes.path[minimaxRes.path.length - 1].getEndX())
+                    resolve()
+                }
+
+
+
+
+                // Make random queen move
+
+
+            } catch(err) {
+                reject(err)
+            }
+                        // Make the move
+              // Change the player, whcih actually already when executing move i guess
+
+            })
+
+        // Weitere Methoden wie Überprüfung auf gültige Züge, Überprüfung der Gewinnbedingungen usw.
+      }
+
+
+  generateMoves(path: Move[], isMaxPlayer: boolean): Move[] {
+    possibleMoves = []
+
+    let playerGeneratingFor = 1
+    if(isMaxPlayer){
+        playerGeneratingFor = 2
+    }
+
+    let currentBoard = this.board.map(row => [...row])
+
+    for(let move = path.length - 1; move >= 0; move--){
+        currentBoard = this.applyMove(currentBoard, path[move])
+    }
+
+    let beatingMoveExists = false
+    console.log('FIND BEATING MOVES', playerGeneratingFor, 'WIT PATH', path)
+    let beatingMove = this.findMovesWhichBeat(currentBoard, playerGeneratingFor)
+    console.log(beatingMove, 'MOVE')
+    let beatingPiece = beatingMove.getPiece()
+    console.log(beatingPiece, 'PIECE')
+    if(beatingPiece){
+        console.log('BEATING MOVE FOUND', beatingMove)
+        beatingMoveExists = true
+    }
+    for(row in currentBoard){
+        //console.log(currentBoard[row], 'Row', row, 'of board')
+    }
+    for(var row = 0; row < 10; row++){
+      for(var col = 0; col < 10; col++){
+          var piece = currentBoard[row][col]
+
+          //console.log(piece, 'PIECE FROM GENERATE MOVES IS AT', row, col)
+          if(piece){
+
+            // For Player 1 ~ means Player = false
+            if(!piece.isQueen && piece.playerId == playerGeneratingFor && playerGeneratingFor == 2){
+              if(this.isValidMove(col, row, Number(col) + 1, Number(row) - 1, currentBoard, 2)){
+                if(!beatingMoveExists || (beatingMoveExists && this.checkAndRemoveOppBeaten(col, row, Number(col) + 1, Number(row) - 1, true, currentBoard, playerGeneratingFor))){
+                    possibleMoves.push(new Move(piece, Number(col) + 1, Number(row) - 1, col, row))
+                } else {
+                    //console.log('BEATING MOVES BLOCKED + - 1')
+                }
+              } else {
+                //console.log('VALID MOVES SAGT NEIN + - 1')
+              }
+              if(this.isValidMove(col, row, Number(col) - 1, Number(row) - 1, currentBoard, 2)){
+                if(!beatingMoveExists || (beatingMoveExists && this.checkAndRemoveOppBeaten(col, row, Number(col) - 1, Number(row) - 1, true, currentBoard, playerGeneratingFor))){
+                    possibleMoves.push(new Move(piece, Number(col) - 1, Number(row) - 1, col, row))
+                }else {
+                     //console.log('BEATING MOVES BLOCKED - - 1')
+                 }
+               } else {
+                 //console.log('VALID MOVES SAGT NEIN - - 1')
+
+              }
+              if(this.isValidMove(col, row, Number(col) + 2, Number(row) - 2, currentBoard, 2)){
+                if(!beatingMoveExists || (beatingMoveExists && this.checkAndRemoveOppBeaten(col, row, Number(col) + 2, Number(row) - 2, true, currentBoard, playerGeneratingFor))){
+                    possibleMoves.push(new Move(piece, Number(col) + 2, Number(row) - 2, col, row))
+                }else {
+                    //console.log('BEATING MOVES BLOCKED + - 2')
+                }
+              } else {
+                //console.log('VALID MOVES SAGT NEIN + - 2')
+
+              }
+              if(this.isValidMove(col, row, Number(col) - 2, Number(row) - 2, currentBoard, 2)){
+                if(!beatingMoveExists || (beatingMoveExists && this.checkAndRemoveOppBeaten(col, row, Number(col) - 2, Number(row) - 2, true, currentBoard, playerGeneratingFor))){
+                    possibleMoves.push(new Move(piece, Number(col) - 2, Number(row) - 2, col, row))
+                } else {
+                      //console.log('BEATING MOVES BLOCKED - - 2')
+                }
+              } else {
+                  //console.log('VALID MOVES SAGT NEIN - - 2')
+
+              }
+            } else if(!piece.isQueen && piece.playerId == playerGeneratingFor && playerGeneratingFor == 1) {
+                //console.log('GENERATING FOR PLAYER 1')
+              if(this.isValidMove(col, row, Number(col) + 1, Number(row) + 1, currentBoard, 1)){
+                if(!beatingMoveExists || (beatingMoveExists && this.checkAndRemoveOppBeaten(col, row, Number(col) + 1, Number(row) + 1, true, currentBoard, playerGeneratingFor))){
+                    //console.log('ADDED MOVES')
+                    possibleMoves.push(new Move(piece, Number(col) + 1, Number(row) + 1, col, row))
+                }else {
+                   //console.log('BEATING MOVES BLOCKED + + 1')
+                }
+              } else {
+                //console.log('VALID MOVES SAGT NEIN + + 1'
+              }
+              if(this.isValidMove(col, row, Number(col) - 1, Number(row) + 1, currentBoard, 1)){
+                //console.log('Simple billo check', currentBoard[6][4])
+                if(!beatingMoveExists || (beatingMoveExists && this.checkAndRemoveOppBeaten(col, row, Number(col) - 1, Number(row) + 1, true, currentBoard, playerGeneratingFor))){
+                    //console.log('ADDED MOVES')
+                    possibleMoves.push(new Move(piece, Number(col) - 1, Number(row) + 1, col, row))
+                }else {
+                    //console.log('BEATING MOVES BLOCKED - + 1')
+                }
+              } else {
+                   //console.log('VALID MOVES SAGT NEIN - + 1')
+              }
+              if(this.isValidMove(col, row, Number(col) + 2, Number(row) + 2, currentBoard, 1)){
+                if(!beatingMoveExists || (beatingMoveExists && this.checkAndRemoveOppBeaten(col, row, Number(col) + 2, Number(row) + 2, true, currentBoard, playerGeneratingFor))){
+                    //console.log('ADDED MOVES')
+                    possibleMoves.push(new Move(piece, Number(col) + 2, Number(row) + 2, col, row))
+                }else {
+                    //console.log('BEATING MOVES BLOCKED + + 2')
+                }
+              } else {
+                //console.log('VALID MOVES SAGT NEIN + + 2', col, row, Number(col) + 2, Number(row) + 2)
+              }
+              if(this.isValidMove(col, row, Number(col) - 2, Number(row) + 2, currentBoard, 1)){
+                //console.log(!beatingMoveExists, beatingMoveExists ,this.checkAndRemoveOppBeaten(col, row, Number(col) - 2, Number(row) + 2, true, currentBoard, playerGeneratingFor))
+                if(!beatingMoveExists || (beatingMoveExists && this.checkAndRemoveOppBeaten(col, row, Number(col) - 2, Number(row) + 2, true, currentBoard, playerGeneratingFor))){
+                    //console.log('ADDED MOVES')
+                    possibleMoves.push(new Move(piece, Number(col) - 2, Number(row) + 2, col, row))
+                }else {
+                    //console.log('BEATING MOVES BLOCKED - + 2')
+                }
+              } else {
+                //console.log('VALID MOVES SAGT NEIN - + 2', col, row, Number(col) - 2, Number(row) + 2)
+              }
+            } else if(piece.isQueen && piece.playerId == playerGeneratingFor) {
+              for(var i = 1; i < 10; i++){
+                if(Number(col) - i >= 0 && row + i < 10 && this.isValidMove(col, row, Number(col) - i, Number(row) + i, currentBoard, playerGeneratingFor)){
+                  if(!beatingMoveExists || (beatingMoveExists && this.checkAndRemoveOppBeaten(col, row, Number(col) - i, Number(row) + i, true, currentBoard, playerGeneratingFor))){
+                      possibleMoves.push(new Move(piece, Number(col) - i, Number(row) + i, col, row))
+                  }
+                }
+                if(Number(col) - i >= 0 && row - i >= 0 && this.isValidMove(col, row, Number(col) - i, Number(row) - i, currentBoard, playerGeneratingFor)){
+                  if(!beatingMoveExists || (beatingMoveExists && this.checkAndRemoveOppBeaten(col, row, Number(col) - i, Number(row) - i, true, currentBoard, playerGeneratingFor))){
+                      possibleMoves.push(new Move(piece, Number(col) - i, Number(row) - i, col, row))
+                  }
+                }
+                if(Number(col) + i < 10 && row + i < 10 && this.isValidMove(col, row, Number(col) + i, Number(row) + i, currentBoard, playerGeneratingFor)){
+                  if(!beatingMoveExists || (beatingMoveExists && this.checkAndRemoveOppBeaten(col, row, Number(col) + i, Number(row) + i, true, currentBoard, playerGeneratingFor))){
+                      possibleMoves.push(new Move(piece, Number(col) + i, Number(row) + i, col, row))
+                  }
+                }
+                if(Number(col) + i < 10 && row - i >= 0 && this.isValidMove(col, row, Number(col) + i, Number(row) - i, currentBoard, playerGeneratingFor)){
+                  if(!beatingMoveExists || (beatingMoveExists && this.checkAndRemoveOppBeaten(col, row, Number(col) + i, Number(row) - i, true, currentBoard, playerGeneratingFor))){
+                      possibleMoves.push(new Move(piece, Number(col) + i, Number(row) - i, col, row))
+                  }
+                }
+              }
+            }
+          }
+
+          // Make random queen move
+      }
+    }
+    for(move in possibleMoves){
+        //console.log(move, ':', JSON.stringify(possibleMoves[move]) + '\n')
+    }
+
+    let foundCleanMoves = []
+
+    for(move in possibleMoves){
+        let moveInQ = this.checkAndRemoveOppBeaten(possibleMoves[move].getStartX(), possibleMoves[move].getStartY(), possibleMoves[move].getEndX(), possibleMoves[move].getEndY(), true, currentBoard, playerGeneratingFor)
+        if(moveInQ){
+            console.log('SETTING BOOL TRUE BECAUSE OF', possibleMoves[move])
+            foundCleanMoves.push(new Move(possibleMoves[move].getPiece(), possibleMoves[move].getEndX(), possibleMoves[move].getEndY(), possibleMoves[move].getStartX(), possibleMoves[move].getStartY()))
+        }
+    }
+
+    if(foundCleanMoves.length > 0){
+        return foundCleanMoves
+    } else {
+        return possibleMoves
+    }
+  }
+
+  applyMove(board: number[][], move: Move): number[][] {
+
+      /**
+      const beatenPiece: GamePiece | null = this.checkAndRemoveOppBeaten(startCol, startRow, endCol, endRow, true);
+      var foundBeatingMove = this.findMovesWhichBeat().getPiece()
+      if (beatenPiece == null && foundBeatingMove) {
+        this.stateString = `Spieler ${this.currentPlayer} hat die Schlagpflicht verletzt, wähle einen anderen Zug`;
+        return false;
+      }
+
+      if(foundBeatingMove && foundBeatingMove.isQueen && beatenPiece && !beatenPiece.isQueen){
+        stateString = 'Dame schlagen geht vor';
+        return false;
+      }
+      */
+
+
+      // Beispiel für das Bewegen eines Spielsteins
+
+
+      const piece = board[move.getStartY()][move.getStartX()];
+      board[move.getEndY()][move.getEndX()] = piece;
+      //console.log(board[move.getEndY()][move.getEndX()], ' Moved piece at new location')
+      board[move.getStartY()][move.getStartX()] = null;
+      //console.log(board[move.getStartY()][move.getStartX()], ' Content of old location')
+
+      return board
+
+      //const beatenPiece = this.checkAndRemoveOppBeaten(startCol, startRow, endCol, endRow, false);
+
+  }
+
+  evaluateState(board: number[][], path: Move[]): number {
+
+
+    let evaluationBoardCopy = this.board.map(row => [...row])
+    let returnValueForBeat = 0
+    let boardScore = 0
+
+    console.log('EVAL PATH', path)
+
+
+    // Apply first move of simulation, which will be a maxi move
+    for(let move = path.length - 1; move >= 0; move--){
+        evaluationBoardCopy = this.applyMove(evaluationBoardCopy, path[move])
+        let potBeatenPiece = this.checkAndRemoveOppBeaten(path[move].getStartX(), path[move].getStartY(), path[move].getEndX(), path[move].getEndY(), true,  evaluationBoardCopy, (path[move].getPiece().playerId))
+
+        //console.log(potBeatenPiece, 'POT BEATEN PIECE')
+        if(potBeatenPiece && potBeatenPiece.playerId == 1){
+            console.log(path[move], 'gives us infinity')
+            returnValueForBeat = Infinity
+            return returnValueForBeat
+        } else if(potBeatenPiece && potBeatenPiece.playerId == 2){
+            console.log(path[move], 'gives us negative infinity')
+            returnValueForBeat = -Infinity
+            return returnValueForBeat
+        }
+    }
+
+    for(const row in evaluationBoardCopy){
+        for(const col in evaluationBoardCopy[row]){
+            const piece = evaluationBoardCopy[row][col]
+            if(piece){
+
+                let colValue = 0
+                let rowValue = 9 - row
+                let addValue = 0
+                let subValue = 0
+
+                if(rowValue == 0){
+                    rowValue = 35
+                } else if(row == 1){
+                    rowValue == 1
+                } else if(row == 2){
+                    rowValue == 2
+                } else if(row == 3){
+                    rowValue == 4
+                } else if(row == 4){
+                    rowValue == 7
+                } else if(row == 5){
+                    rowValue == 11
+                } else if(row == 6){
+                    rowValue == 16
+                }else if(row == 7){
+                    rowValue == 22
+                }else if(row == 8){
+                    rowValue == 29
+                }else if(row == 9){
+                    rowValue == 37
+                }
+
+                if(col < 5){
+                    colValue = Math.abs(5 - col)
+                } else {
+                    colValue = Math.abs(4 - col)
+                }
+
+                if(row - 1 >= 0 && col -1 >= 0 && (!evaluationBoardCopy[row - 1][col - 1] || evaluationBoardCopy[row - 1][col - 1].playerId == 2)){
+                    addValue++
+                }
+                if(row - 1 >= 0 && col +1 < 10 && (!evaluationBoardCopy[row - 1][col + 1] || evaluationBoardCopy[row - 1][col + 1].playerId == 2)){
+                    addValue++
+                }
+
+                if(row - 1 >= 0 && col - 1 >= 0 && col + 1 < 10 && (evaluationBoardCopy[row - 1][col - 1] && evaluationBoardCopy[row - 1][col - 1].playerId == 1 &&
+                         !evaluationBoardCopy[row + 1][col + 1])){
+                    subValue = subValue - 10
+                }
+                if(row - 1 >= 0 && col + 1 < 10 && col - 1 >= 0 && (evaluationBoardCopy[row - 1][col + 1] && evaluationBoardCopy[row - 1][col + 1].playerId == 1 &&
+                        !evaluationBoardCopy[row + 1][col - 1])){
+                    subValue = subValue - 10
+                }
+
+                boardScore = boardScore + (colValue + rowValue + addValue + subValue)
+            }
+
+
+
+        }
+    }
+
+    if(returnValueForBeat != 0){
+        //console.log(returnValueForBeat, 'for path', path)
+        return returnValueForBeat
+    } else {
+        //console.log(boardScore, 'for path', path)
+        return boardScore
+    }
+
+
+
+  }
+
+  minimax(state: number[][], depth: number, alpha: number, beta: number, isMaximizingPlayer: boolean, path: Move[] = []): MinimaxResult {
+      if (depth === 0 || this.checkWin(state)) {
+          return {score: this.evaluateState(state, path), path: path};
+      }
+
+      let newState = state.map(row => [...row])
+
+      if (isMaximizingPlayer) {
+          let maxEval: MinimaxResult = { score: -Infinity, path: [] };
+          for (const move of this.generateMoves(path, true)) {
+              console.log('CURRENT MOVE', move)
+              let tempState = newState.map(row => [...row])
+              const value = this.minimax(this.applyMove(tempState, move), depth - 1, alpha, beta, false, [move].concat(path));
+              //console.log(path, 'Current path')
+              if (value.score >= maxEval.score) {
+                  maxEval.score = value.score;
+                  maxEval.path = value.path; // Prepend this move to the path leading to the best score
+              }
+              alpha = Math.max(alpha, value.score);
+              /**
+              if (beta <= alpha) {
+                  break;
+              }
+              */
+
+          }
+          return maxEval;
+      } else {
+          let minEval: MinimaxResult = { score: Infinity, path: [] };
+          for (const move of this.generateMoves(path, false)) {
+              console.log('CURRENT MOVE', move)
+              let tempState = newState.map(row => [...row])
+              const value = this.minimax(this.applyMove(tempState, move), depth - 1, alpha, beta, true, [move].concat(path));
+              if (value.score <= minEval.score) {
+                  minEval.score = value.score;
+                  minEval.path = value.path; // Prepend this move to the path
+              }
+              beta = Math.min(beta, value.score);
+              /**
+              if (beta <= alpha) {
+                  break;
+              }
+              */
+          }
+          return minEval;
+      }
+
+    }
 
 }
 
@@ -849,4 +1294,9 @@ class Move{
     getStartY(): number {
         return this.startY
     }
+}
+
+interface MinimaxResult {
+    score: number
+    path: Move[]
 }

@@ -6,4 +6,4 @@
 - RAM leicht steigend konstant
 
 loakler speicher shared preferences
-computer gegner für dame
+computer gegner für dame, spring annimation, fade annimation

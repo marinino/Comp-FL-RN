@@ -7,9 +7,10 @@ interface PieceProps {
   playerID: number;
   isQueen?: boolean;
   position: Animated.ValueXY;
+  opacity: Animated.Value
 }
 
-const Piece: React.FC<PieceProps> = ({ id, playerID, isQueen = false, position }) => {
+const Piece: React.FC<PieceProps> = ({ id, playerID, isQueen = false, position}) => {
   const pieceStyle = {
     ...styles.piece,
     backgroundColor: playerID === 1 ? 'white' : 'black',

@@ -42,7 +42,7 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
     game.addListener(_updateGame);
 
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 10000),
+      duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
 
@@ -116,7 +116,7 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
   }
 
   void _startAnimation(int startX, int startY, int endX, int endY) {
-    log('PINWORD' + _screenWidth.toString());
+    log('PINWORD $_screenWidth');
     final beginOffset = Offset((((startX.toDouble() - endX.toDouble()) * (_screenWidth / 10 )) + ((_screenWidth / 10 ) * 0.1)),
         ((startY.toDouble()- endY.toDouble()) * (_screenWidth / 10 )) + ((_screenWidth / 10 ) * 0.1));
     final endOffset = Offset((_screenWidth) / 10 * 0.1,(_screenWidth) / 10  * 0.1);
@@ -275,7 +275,7 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
     );
   }
 
-  void onAnimationComplete() {
+  Future<void> onAnimationComplete() async {
     log("Animation completed!" + game.currentPlayer.toString());
     for(var i = 0; i < 10; i++){
       for(var j = 0; j < 10; j++){
@@ -283,21 +283,21 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
       }
     }
 
-    GamePiece? beatenPiece = game.checkAndRemoveOppBeaten(_postAnimationStartX ,_postAnimationStartY , _postAnimationEndX, _postAnimationEndY, false);
+    GamePiece? beatenPiece = game.checkAndRemoveOppBeaten(_postAnimationStartX ,_postAnimationStartY , _postAnimationEndX, _postAnimationEndY, false, game.board, game.currentPlayer);
 
 
     bool newQueen = game.checkForQueenConv();
 
 
     // Changes player, if futher beat is not possible or there was no beat in the first place
-    if(beatenPiece != null && game.findMovesWhichBeat().getPiece() != null && newQueen == false){
+    if(beatenPiece != null && game.findMovesWhichBeat(game.board, game.currentPlayer).getPiece() != null && newQueen == false){
       game.stateString = 'Spieler $game.currentPlayer bleibt dran';
     } else {
       game.currentPlayer = 3 - game.currentPlayer;
       game.stateString = 'Spieler $game.currentPlayer ist dran';
     }
 
-    if(game.checkWin()){
+    if(game.checkWin(game.board)){
       game.stateString = 'Spieler ${3-game.currentPlayer} hat gewonnen';
       Future.delayed(Duration(seconds: 5), (){
         game.resetGame();
@@ -309,7 +309,8 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
 
     if(game.currentPlayer == 2) {
       log('SIM PC MOVE ${game.currentPlayer}');
-      var dataFromMove = game.simulateComputerMove();
+      var dataFromMove = await game.simulateComputerMoveWithMiniMax();
+      log('BOUT TO START ANI');
       _startAnimation(dataFromMove[0], dataFromMove[1], dataFromMove[2], dataFromMove[3]);
       setAfterAnimationValues(dataFromMove[0], dataFromMove[1], dataFromMove[2], dataFromMove[3]);
     }
