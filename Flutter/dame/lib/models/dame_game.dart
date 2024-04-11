@@ -44,16 +44,16 @@ class DameGame {
     stateString = 'Spieler 1 ist an der Reihe';
   }
 
-  bool move(int startX, int startY, int endX, int endY) {
+  Future<bool> move(int startX, int startY, int endX, int endY) async {
     print('Called move');
     // Prüfen Sie, ob der Zug gültig ist
-    if (!isValidMove(startX, startY, endX, endY, board, currentPlayer)) {
+    if (!await isValidMove(startX, startY, endX, endY, [], currentPlayer)) {
       return false;
     }
 
     var checkBeatenPiece = checkAndRemoveOppBeaten(
         startX, startY, endX, endY, true, board, currentPlayer);
-    var foundOptimum = findMovesWhichBeat(board, currentPlayer);
+    var foundOptimum = await findMovesWhichBeat([], currentPlayer);
 
     if (checkBeatenPiece == null && foundOptimum.getPiece() != null) {
       stateString =
@@ -89,7 +89,7 @@ class DameGame {
   GamePiece? checkAndRemoveOppBeaten(int startX, int startY, int endX, endY,
       bool simulate, List<List<GamePiece?>> pBoard, int pPlayer) {
     GamePiece? beatenPiece;
-    print('REMOVED BEATEN PIECE');
+    //print('REMOVED BEATEN PIECE');
 
     // Only no fields were jumped, so nobody could be beaten
     if ((startX - endX).abs() == 1) {
@@ -135,93 +135,127 @@ class DameGame {
     return visitedFields;
   }
 
-  bool isValidMove(int startX, int startY, int endX, int endY, List<List<GamePiece?>> pBoard, int pPlayer) {
+  Future<bool> isValidMove(int startX, int startY, int endX, int endY, List<Move> path, int pPlayer) async {
     // Fügen Sie hier Ihre Logik hinzu, um zu prüfen, ob ein Zug gültig ist
     // Berücksichtigen Sie die Richtung der Bewegung, ob das Zielfeld frei ist,
     // und ob ein Gegner übersprungen wird.
 
+    List<List<GamePiece?>> newBoard = board.map((list) => List<GamePiece?>.from(list))
+        .toList();
+
+    //print(path.toString());
+
+    for (var move = path.length - 1; move >= 0; move--) {
+      newBoard = await applyMove(newBoard, path[move]);
+    }
+    //print(newBoard.toString());
+
     bool jumpedOwnPiecesOrAir = false;
     List<List<int>> jumpedFields = getJumpedFields(startX, startY, endX, endY);
-    print('CALLED ISVALIDMOVE' + endX.toString() + endY.toString() + startX.toString() + startY.toString());
+    //print('CALLED ISVALIDMOVE' + endX.toString() + endY.toString() + startX.toString() + startY.toString());
 
     if(endX > 9 || endX < 0 || endY > 9 || endY < 0){
-      print('EndX out of range');
+      //print('EndX out of range');
+      //if(endY == 5 && endX == 2){
+        print('Out of bounds');
+      //}
       return false;
     }
 
-    print('Still going anyway');
+    //print('Still going anyway');
 
     // Checks if landing piece is free
-    if (pBoard[endY][endX] != null) {
-      print('FIELD NOT EMPTY ${endY} ${endX}');
+    if (newBoard[endY][endX] != null) {
+      //print('FIELD NOT EMPTY ${endY} ${endX}');
+      //if(endY == 5 && endX == 2){
+        print('Zielort nicht frei');
+      //}
       stateString = 'Der Zielort muss ein freies Feld sein';
       return false;
     }
 
     // Jump straight in X or Y direction
     if (startX == endX || startY == endY) {
+      //if(endY == 5 && endX == 2){
+        print('Nur diagonale Züge erlaubt, is gleich');
+      //}
       stateString = 'Es sind nur diagonale Züge erlaubt';
       return false;
     }
 
     // Jump not the same distance in X and Y
     if ((startX - endX).abs() != (startY - endY).abs()) {
+      //if(endY == 5 && endX == 2){
+        print('Nur diagonale Züge erlaubt, nicht genau diagonal');
+      //}
       stateString = 'Es sind nur diagonale Züge erlaubt';
       return false;
     }
 
     jumpedFields.forEach((element) {
-      if (pBoard[element[1]][element[0]]?.playerId == pPlayer) {
+      if (newBoard[element[1]][element[0]]?.playerId == pPlayer) {
         jumpedOwnPiecesOrAir = true;
       }
     });
     // Need that for own pieces because Flutter FTW
     // Not jumping over a empty tile or a own piece
     if (jumpedOwnPiecesOrAir) {
+      //if(endY == 5 && endX == 2){
+        print('Man darf nur über Steine des Gegners springen');
+      //}
       stateString = 'Man darf nur über Steine des Gegners springen Test';
       return false;
     }
 
     // FOR NON QUEENS
-    if ((pBoard[startY][startX] != null && (!pBoard[startY][startX]!.isQueen))) {
+    if ((newBoard[startY][startX] != null && (!newBoard[startY][startX]!.isQueen))) {
       //If you try to move backwards
       if (((endY < startY) && pPlayer == 1) ||
           ((endY > startY) && pPlayer == 2)) {
+        //if(endY == 5 && endX == 2){
+          print('Rückwärts laufen ist nur mit Damen erlaubt');
+        //}
         stateString = 'Rückwärts laufen ist nur mit Damen erlaubt';
         return false;
       }
 
       // If the piece is not a queen it can not jump more than two
-      if (pBoard[startY][startX] != null && (!pBoard[startY][startX]!.isQueen) &&
+      if (newBoard[startY][startX] != null && (!newBoard[startY][startX]!.isQueen) &&
           (startX - endX).abs() > 2) {
+        //if(endY == 5 && endX == 2){
+          print('Nur max zwei Felder');
+        //}
         stateString = 'Normale Steine können maximal zwei Felder springen';
         return false;
       }
 
       jumpedFields.forEach((element) {
-        if (board[element[1]][element[0]] == null) {
+        if (newBoard[element[1]][element[0]] == null) {
           jumpedOwnPiecesOrAir = true;
         }
       });
       // Need that for own pieces because Flutter FTW
       // Not jumping over a empty tile or a own piece
       if (jumpedOwnPiecesOrAir) {
+        //if(endY == 5 && endX == 2){
+          print('Man darf nur über Steine des Gegners springen');
+        //}
         stateString = 'Man darf nur über Steine des Gegners springen';
         return false;
       }
       // FOR QUEENS
     } else
-    if ((pBoard[startY][startX] != null && (pBoard[startY][startX]!.isQueen))) {
+    if ((newBoard[startY][startX] != null && (newBoard[startY][startX]!.isQueen))) {
       // Queen must be surrounded by enemy piece
 
       int counterOfOpponentPieces = 0;
       bool foundOwnPiece = false;
 
       for (var element in jumpedFields) {
-        if (pBoard[element[1]][element[0]]?.playerId == (3 - pPlayer)) {
+        if (newBoard[element[1]][element[0]]?.playerId == (3 - pPlayer)) {
           counterOfOpponentPieces++;
         }
-        if (pBoard[element[1]][element[0]]?.playerId == pPlayer) {
+        if (newBoard[element[1]][element[0]]?.playerId == pPlayer) {
           foundOwnPiece = true;
         }
       }
@@ -238,20 +272,20 @@ class DameGame {
 
 
       if ((endY - 1 >= 0 && endX - 1 >= 0 &&
-          pBoard[endY - 1][endX - 1]?.playerId != (3 - pPlayer)) &&
+          newBoard[endY - 1][endX - 1]?.playerId != (3 - pPlayer)) &&
           (endY - 1 >= 0 && endX + 1 < 10 &&
-              pBoard[endY - 1][endX + 1]?.playerId != (3 - pPlayer)) &&
+              newBoard[endY - 1][endX + 1]?.playerId != (3 - pPlayer)) &&
           (endY + 1 < 10 && endX - 1 >= 0 &&
-              pBoard[endY + 1][endX - 1]?.playerId != (3 - pPlayer)) &&
+              newBoard[endY + 1][endX - 1]?.playerId != (3 - pPlayer)) &&
           (endY + 1 < 10 && endX + 1 < 10 &&
-              pBoard[endY + 1][endX + 1]?.playerId != (3 - pPlayer)) &&
-          checkAndRemoveOppBeaten(startX, startY, endX, endY, true, pBoard, pPlayer) != null) {
+              newBoard[endY + 1][endX + 1]?.playerId != (3 - pPlayer)) &&
+          checkAndRemoveOppBeaten(startX, startY, endX, endY, true, newBoard, pPlayer) != null) {
         stateString = 'Die Dame muss direkt um einen Gegner herum landen';
         return false;
       }
     }
     // IF ELIMINATION HAPPENS NO NEED TO CHECK IF MOVE IS VALID
-    if (checkAndRemoveOppBeaten(startX, startY, endX, endY, true, pBoard, pPlayer) != null) {
+    if (checkAndRemoveOppBeaten(startX, startY, endX, endY, true, newBoard, pPlayer) != null) {
       return true;
     }
 
@@ -304,246 +338,253 @@ class DameGame {
     return false;
   }
 
-  Move findMovesWhichBeat(List<List<GamePiece?>> pBoard, int pPlayer) {
+  Future<Move> findMovesWhichBeat(List<Move> path, int pPlayer) async {
     var returnPiece = new Move(null, -1, -1, -1, -1);
 
+    List<List<GamePiece?>> newBoard = board.map((list) => List<GamePiece?>.from(list))
+        .toList();
+
+    for (var move = path.length - 1; move >= 0; move--) {
+      newBoard = await applyMove(newBoard, path[move]);
+    }
+
     // Check if any elimination is possible
-    for (var elementRow in pBoard) {
+    for (var elementRow in newBoard) {
       for (var elementItem in elementRow) {
         if (elementItem != null && elementItem.playerId == pPlayer) {
           if (!elementItem.isQueen) {
             // Test lower right
-            if (pBoard.indexOf(elementRow) + 2 < 10 &&
+            if (newBoard.indexOf(elementRow) + 2 < 10 &&
                 elementRow.indexOf(elementItem) + 2 < 10) {
               // CONTINUE WITH CHECK IF MOVE IS VALID
-              if (isValidMove(elementRow.indexOf(elementItem),
-                  pBoard.indexOf(elementRow),
+              if (await isValidMove(elementRow.indexOf(elementItem),
+                  newBoard.indexOf(elementRow),
                   elementRow.indexOf(elementItem) + 2,
-                  pBoard.indexOf(elementRow) + 2, pBoard, pPlayer)) {
+                  newBoard.indexOf(elementRow) + 2, path, pPlayer)) {
                 var tempPiece = checkAndRemoveOppBeaten(
-                    elementRow.indexOf(elementItem), pBoard.indexOf(elementRow),
+                    elementRow.indexOf(elementItem), newBoard.indexOf(elementRow),
                     elementRow.indexOf(elementItem) + 2,
-                    pBoard.indexOf(elementRow) + 2, true, pBoard, pPlayer);
+                    newBoard.indexOf(elementRow) + 2, true, newBoard, pPlayer);
 
                 var returnedPiece = checkToChangeReturningPiece(
                     returnPiece, tempPiece);
                 if (returnedPiece != null && returnedPiece.isQueen) {
-                  return new Move(
+                  return Move(
                       returnedPiece, elementRow.indexOf(elementItem) + 2,
-                      pBoard.indexOf(elementRow) + 2,
+                      newBoard.indexOf(elementRow) + 2,
                       elementRow.indexOf(elementItem),
-                      pBoard.indexOf(elementRow));
+                      newBoard.indexOf(elementRow));
                 } else if (returnedPiece != null) {
-                  returnPiece = new Move(
+                  returnPiece = Move(
                       returnedPiece, elementRow.indexOf(elementItem) + 2,
-                      pBoard.indexOf(elementRow) + 2,
+                      newBoard.indexOf(elementRow) + 2,
                       elementRow.indexOf(elementItem),
-                      pBoard.indexOf(elementRow));
+                      newBoard.indexOf(elementRow));
                 }
               }
             }
-            if ((pBoard.indexOf(elementRow) + 2) < 10 &&
+            if ((newBoard.indexOf(elementRow) + 2) < 10 &&
                 0 <= elementRow.indexOf(elementItem) - 2) {
-              if (isValidMove(elementRow.indexOf(elementItem),
-                  pBoard.indexOf(elementRow),
+              if (await isValidMove(elementRow.indexOf(elementItem),
+                  newBoard.indexOf(elementRow),
                   elementRow.indexOf(elementItem) - 2,
-                  pBoard.indexOf(elementRow) + 2, pBoard, pPlayer)) {
+                  newBoard.indexOf(elementRow) + 2, path, pPlayer)) {
                 var tempPiece = checkAndRemoveOppBeaten(
-                    elementRow.indexOf(elementItem), pBoard.indexOf(elementRow),
+                    elementRow.indexOf(elementItem), newBoard.indexOf(elementRow),
                     elementRow.indexOf(elementItem) - 2,
-                    pBoard.indexOf(elementRow) + 2, true, pBoard, pPlayer);
+                    newBoard.indexOf(elementRow) + 2, true, newBoard, pPlayer);
 
                 var returnedPiece = checkToChangeReturningPiece(
                     returnPiece, tempPiece);
                 if (returnedPiece != null && returnedPiece.isQueen) {
-                  return new Move(
+                  return Move(
                       returnedPiece, elementRow.indexOf(elementItem) - 2,
-                      pBoard.indexOf(elementRow) + 2,
+                      newBoard.indexOf(elementRow) + 2,
                       elementRow.indexOf(elementItem),
-                      pBoard.indexOf(elementRow));
+                      newBoard.indexOf(elementRow));
                 } else if (returnedPiece != null) {
-                  returnPiece = new Move(
+                  returnPiece = Move(
                       returnedPiece, elementRow.indexOf(elementItem) - 2,
-                      pBoard.indexOf(elementRow) + 2,
+                      newBoard.indexOf(elementRow) + 2,
                       elementRow.indexOf(elementItem),
-                      pBoard.indexOf(elementRow));
+                      newBoard.indexOf(elementRow));
                 }
               }
             }
-            if (0 <= pBoard.indexOf(elementRow) - 2 &&
+            if (0 <= newBoard.indexOf(elementRow) - 2 &&
                 0 <= elementRow.indexOf(elementItem) - 2) {
-              if (isValidMove(elementRow.indexOf(elementItem),
-                  pBoard.indexOf(elementRow),
+              if (await isValidMove(elementRow.indexOf(elementItem),
+                  newBoard.indexOf(elementRow),
                   elementRow.indexOf(elementItem) - 2,
-                  pBoard.indexOf(elementRow) - 2, pBoard, pPlayer)) {
+                  newBoard.indexOf(elementRow) - 2, path, pPlayer)) {
                 var tempPiece = checkAndRemoveOppBeaten(
-                    elementRow.indexOf(elementItem), pBoard.indexOf(elementRow),
+                    elementRow.indexOf(elementItem), newBoard.indexOf(elementRow),
                     elementRow.indexOf(elementItem) - 2,
-                    pBoard.indexOf(elementRow) - 2, true, pBoard, pPlayer);
+                    newBoard.indexOf(elementRow) - 2, true, newBoard, pPlayer);
 
                 var returnedPiece = checkToChangeReturningPiece(
                     returnPiece, tempPiece);
                 if (returnedPiece != null && returnedPiece.isQueen) {
-                  return new Move(
+                  return Move(
                       returnedPiece, elementRow.indexOf(elementItem) - 2,
-                      pBoard.indexOf(elementRow) - 2,
+                      newBoard.indexOf(elementRow) - 2,
                       elementRow.indexOf(elementItem),
-                      pBoard.indexOf(elementRow));
+                      newBoard.indexOf(elementRow));
                 } else if (returnedPiece != null) {
-                  returnPiece = new Move(
+                  returnPiece = Move(
                       returnedPiece, elementRow.indexOf(elementItem) - 2,
-                      pBoard.indexOf(elementRow) - 2,
+                      newBoard.indexOf(elementRow) - 2,
                       elementRow.indexOf(elementItem),
-                      pBoard.indexOf(elementRow));
+                      newBoard.indexOf(elementRow));
                 }
               }
             }
-            if (0 <= pBoard.indexOf(elementRow) - 2 &&
+            if (0 <= newBoard.indexOf(elementRow) - 2 &&
                 elementRow.indexOf(elementItem) + 2 < 10) {
-              if (isValidMove(elementRow.indexOf(elementItem),
-                  pBoard.indexOf(elementRow),
+              if (await isValidMove(elementRow.indexOf(elementItem),
+                  newBoard.indexOf(elementRow),
                   elementRow.indexOf(elementItem) + 2,
-                  pBoard.indexOf(elementRow) - 2, pBoard, pPlayer)) {
+                  newBoard.indexOf(elementRow) - 2, path, pPlayer)) {
                 var tempPiece = checkAndRemoveOppBeaten(
-                    elementRow.indexOf(elementItem), pBoard.indexOf(elementRow),
+                    elementRow.indexOf(elementItem), newBoard.indexOf(elementRow),
                     elementRow.indexOf(elementItem) + 2,
-                    pBoard.indexOf(elementRow) - 2, true, pBoard, pPlayer);
+                    newBoard.indexOf(elementRow) - 2, true, newBoard, pPlayer);
 
                 var returnedPiece = checkToChangeReturningPiece(
                     returnPiece, tempPiece);
                 if (returnedPiece != null && returnedPiece.isQueen) {
-                  return new Move(
+                  return Move(
                       returnedPiece, elementRow.indexOf(elementItem) + 2,
-                      pBoard.indexOf(elementRow) - 2,
+                      newBoard.indexOf(elementRow) - 2,
                       elementRow.indexOf(elementItem),
-                      pBoard.indexOf(elementRow));
+                      newBoard.indexOf(elementRow));
                 } else if (returnedPiece != null) {
-                  returnPiece = new Move(
+                  returnPiece = Move(
                       returnedPiece, elementRow.indexOf(elementItem) + 2,
-                      pBoard.indexOf(elementRow) - 2,
+                      newBoard.indexOf(elementRow) - 2,
                       elementRow.indexOf(elementItem),
-                      pBoard.indexOf(elementRow));
+                      newBoard.indexOf(elementRow));
                 }
               }
             }
           } else {
             for (var i = 2; i < 10; i++) {
-              if ((pBoard.indexOf(elementRow) + i) < 10 &&
+              if ((newBoard.indexOf(elementRow) + i) < 10 &&
                   (elementRow.indexOf(elementItem) + i) < 10) {
-                if (isValidMove(
-                    elementRow.indexOf(elementItem), pBoard.indexOf(elementRow),
+                if (await isValidMove(
+                    elementRow.indexOf(elementItem), newBoard.indexOf(elementRow),
                     elementRow.indexOf(elementItem) + i,
-                    pBoard.indexOf(elementRow) + i, pBoard, pPlayer)) {
+                    newBoard.indexOf(elementRow) + i, path, pPlayer)) {
                   var tempPiece = checkAndRemoveOppBeaten(
                       elementRow.indexOf(elementItem),
-                      pBoard.indexOf(elementRow),
+                      newBoard.indexOf(elementRow),
                       elementRow.indexOf(elementItem) + i,
-                      pBoard.indexOf(elementRow) + i, true, pBoard, pPlayer);
+                      newBoard.indexOf(elementRow) + i, true, newBoard, pPlayer);
 
                   var returnedPiece = checkToChangeReturningPiece(
                       returnPiece, tempPiece);
                   if (returnedPiece != null && returnedPiece.isQueen) {
-                    return new Move(
+                    return Move(
                         returnedPiece, elementRow.indexOf(elementItem) + i,
-                        pBoard.indexOf(elementRow) + i,
+                        newBoard.indexOf(elementRow) + i,
                         elementRow.indexOf(elementItem),
-                        pBoard.indexOf(elementRow));
+                        newBoard.indexOf(elementRow));
                   } else if (returnedPiece != null) {
-                    returnPiece = new Move(
+                    returnPiece = Move(
                         returnedPiece, elementRow.indexOf(elementItem) + i,
-                        pBoard.indexOf(elementRow) + i,
+                        newBoard.indexOf(elementRow) + i,
                         elementRow.indexOf(elementItem),
-                        pBoard.indexOf(elementRow));
+                        newBoard.indexOf(elementRow));
                   }
                 }
               }
 
-              if ((pBoard.indexOf(elementRow) + i) < 10 &&
+              if ((newBoard.indexOf(elementRow) + i) < 10 &&
                   (elementRow.indexOf(elementItem) - i) >= 0) {
-                if (isValidMove(
-                    elementRow.indexOf(elementItem), pBoard.indexOf(elementRow),
+                if (await isValidMove(
+                    elementRow.indexOf(elementItem), newBoard.indexOf(elementRow),
                     elementRow.indexOf(elementItem) - i,
-                    pBoard.indexOf(elementRow) + i, pBoard, pPlayer)) {
+                    newBoard.indexOf(elementRow) + i, path, pPlayer)) {
                   var tempPiece = checkAndRemoveOppBeaten(
                       elementRow.indexOf(elementItem),
-                      pBoard.indexOf(elementRow),
+                      newBoard.indexOf(elementRow),
                       elementRow.indexOf(elementItem) - i,
-                      pBoard.indexOf(elementRow) + i, true, pBoard, pPlayer);
+                      newBoard.indexOf(elementRow) + i, true, newBoard, pPlayer);
 
                   var returnedPiece = checkToChangeReturningPiece(
                       returnPiece, tempPiece);
                   if (returnedPiece != null && returnedPiece.isQueen) {
-                    return new Move(
+                    return Move(
                         returnedPiece, elementRow.indexOf(elementItem) - i,
-                        pBoard.indexOf(elementRow) + i,
+                        newBoard.indexOf(elementRow) + i,
                         elementRow.indexOf(elementItem),
-                        pBoard.indexOf(elementRow));
+                        newBoard.indexOf(elementRow));
                   } else if (returnedPiece != null) {
-                    returnPiece = new Move(
+                    returnPiece = Move(
                         returnedPiece, elementRow.indexOf(elementItem) - i,
-                        pBoard.indexOf(elementRow) + i,
+                        newBoard.indexOf(elementRow) + i,
                         elementRow.indexOf(elementItem),
-                        pBoard.indexOf(elementRow));
+                        newBoard.indexOf(elementRow));
                   }
                 }
               }
 
-              if ((pBoard.indexOf(elementRow) - i) >= 0 &&
+              if ((newBoard.indexOf(elementRow) - i) >= 0 &&
                   (elementRow.indexOf(elementItem) + i) < 10) {
-                if (isValidMove(
-                    elementRow.indexOf(elementItem), pBoard.indexOf(elementRow),
+                if (await isValidMove(
+                    elementRow.indexOf(elementItem), newBoard.indexOf(elementRow),
                     elementRow.indexOf(elementItem) + i,
-                    pBoard.indexOf(elementRow) - i, pBoard, pPlayer)) {
+                    newBoard.indexOf(elementRow) - i, path, pPlayer)) {
                   var tempPiece = checkAndRemoveOppBeaten(
                       elementRow.indexOf(elementItem),
-                      pBoard.indexOf(elementRow),
+                      newBoard.indexOf(elementRow),
                       elementRow.indexOf(elementItem) + i,
-                      pBoard.indexOf(elementRow) - i, true, pBoard, pPlayer);
+                      newBoard.indexOf(elementRow) - i, true, newBoard, pPlayer);
 
                   var returnedPiece = checkToChangeReturningPiece(
                       returnPiece, tempPiece);
                   if (returnedPiece != null && returnedPiece.isQueen) {
-                    return new Move(
+                    return Move(
                         returnedPiece, elementRow.indexOf(elementItem) + i,
-                        pBoard.indexOf(elementRow) - i,
+                        newBoard.indexOf(elementRow) - i,
                         elementRow.indexOf(elementItem),
-                        pBoard.indexOf(elementRow));
+                        newBoard.indexOf(elementRow));
                   } else if (returnedPiece != null) {
-                    returnPiece = new Move(
+                    returnPiece = Move(
                         returnedPiece, elementRow.indexOf(elementItem) + i,
-                        pBoard.indexOf(elementRow) - i,
+                        newBoard.indexOf(elementRow) - i,
                         elementRow.indexOf(elementItem),
-                        pBoard.indexOf(elementRow));
+                        newBoard.indexOf(elementRow));
                   }
                 }
               }
 
-              if ((pBoard.indexOf(elementRow) - i) >= 0 &&
+              if ((newBoard.indexOf(elementRow) - i) >= 0 &&
                   (elementRow.indexOf(elementItem) - i) >= 0) {
-                if (isValidMove(
-                    elementRow.indexOf(elementItem), pBoard.indexOf(elementRow),
+                if (await isValidMove(
+                    elementRow.indexOf(elementItem), newBoard.indexOf(elementRow),
                     elementRow.indexOf(elementItem) - i,
-                    pBoard.indexOf(elementRow) - i, pBoard, pPlayer)) {
+                    newBoard.indexOf(elementRow) - i, path, pPlayer)) {
                   var tempPiece = checkAndRemoveOppBeaten(
                       elementRow.indexOf(elementItem),
-                      pBoard.indexOf(elementRow),
+                      newBoard.indexOf(elementRow),
                       elementRow.indexOf(elementItem) - i,
-                      pBoard.indexOf(elementRow) - i, true, pBoard, pPlayer);
+                      newBoard.indexOf(elementRow) - i, true, newBoard, pPlayer);
 
                   var returnedPiece = checkToChangeReturningPiece(
                       returnPiece, tempPiece);
                   if (returnedPiece != null && returnedPiece.isQueen) {
-                    return new Move(
+                    return Move(
                         returnedPiece, elementRow.indexOf(elementItem) - i,
-                        pBoard.indexOf(elementRow) - i,
+                        newBoard.indexOf(elementRow) - i,
                         elementRow.indexOf(elementItem),
-                        pBoard.indexOf(elementRow));
+                        newBoard.indexOf(elementRow));
                   } else if (returnedPiece != null) {
-                    returnPiece = new Move(
+                    returnPiece = Move(
                         returnedPiece, elementRow.indexOf(elementItem) - i,
-                        pBoard.indexOf(elementRow) - i,
+                        newBoard.indexOf(elementRow) - i,
                         elementRow.indexOf(elementItem),
-                        pBoard.indexOf(elementRow));
+                        newBoard.indexOf(elementRow));
                   }
                 }
               }
@@ -592,11 +633,11 @@ class DameGame {
     }
   }
 
-  List<int> simulateComputerMove() {
+  Future<List<int>> simulateComputerMove() async {
     // Find moves which beat mit jedem Stein
 
     // finds 'ideal' piece to move, returns null if no piece beats
-    var optimalMove = findMovesWhichBeat(board, currentPlayer);
+    var optimalMove = await findMovesWhichBeat([], currentPlayer);
     // Makes ideal move if possible
     if (optimalMove.getPiece() != null) {
       print('FOUND OPTIMAL MOVE');
@@ -636,13 +677,13 @@ class DameGame {
       for (var j = 0; j <= 9; j++) {
         if (board[i][j] != null && board[i][j]!.playerId == 2 &&
             !board[i][j]!.isQueen) {
-          if (j + 1 < 10 && i - 1 >= 0 && isValidMove(j, i, j + 1, i - 1, board, currentPlayer) &&
+          if (j + 1 < 10 && i - 1 >= 0 && await isValidMove(j, i, j + 1, i - 1, [], currentPlayer) &&
               !surroundedByDanger(i - 1, j + 1, i, j)) {
             print('RANDOM MOVE BUT WITH NO DANGER');
             move(j, i, j + 1, i - 1);
             return [j, i, j + 1, i - 1];
           } else
-          if (j - 1 >= 0 && i - 1 >= 0 && isValidMove(j, i, j - 1, i - 1, board, currentPlayer) &&
+          if (j - 1 >= 0 && i - 1 >= 0 && await isValidMove(j, i, j - 1, i - 1, [], currentPlayer) &&
               !surroundedByDanger(i - 1, j - 1, i, j)) {
             print('RANDOM MOVE BUT WITH NO DANGER');
             move(j, i, j - 1, i - 1);
@@ -678,7 +719,7 @@ class DameGame {
           print('FOUND PC STONE AT: ${i} ${j}');
           for (var k = 1; k <= 9; k++) {
             print('SURROUNDED BY DANGER!!!!!?????????? - +');
-            if (isValidMove(j, i, j + k, i - k, board, currentPlayer) &&
+            if (await isValidMove(j, i, j + k, i - k, [], currentPlayer) &&
                 !surroundedByDanger(i - k, j + k, i, j)) {
               print('TOP RIGHT LETS GO ${i} ${j} ${i - k} ${j +
                   k } THIS IS CURRENT K ${k}');
@@ -688,21 +729,21 @@ class DameGame {
             }
 
             print('SURROUNDED BY DANGER!!!!!?????????? - -');
-            if (isValidMove(j, i, j - k, i - k, board, currentPlayer) &&
+            if (await isValidMove(j, i, j - k, i - k, [], currentPlayer) &&
                 !surroundedByDanger(i - k, j - k, i, j)) {
               move(j, i, j - k, i - k);
               return [j, i, j - k, i - k];
             }
 
             print('SURROUNDED BY DANGER!!!!!?????????? + -');
-            if (isValidMove(j, i, j - k, i + k, board, currentPlayer) &&
+            if (await isValidMove(j, i, j - k, i + k, [], currentPlayer) &&
                 !surroundedByDanger(i + k, j - k, i, j)) {
               move(j, i, j - k, i + k);
               return [j, i, j - k, i + k];
             }
 
             print('SURROUNDED BY DANGER!!!!!?????????? + +');
-            if (isValidMove(j, i, j + k, i + k, board, currentPlayer) &&
+            if (await isValidMove(j, i, j + k, i + k, [], currentPlayer) &&
                 !surroundedByDanger(i + k, j + k, i, j)) {
               move(j, i, j + k, i + k);
               return [j, i, j + k, i + k];
@@ -716,7 +757,7 @@ class DameGame {
     for (var i = 0; i <= 8; i++) {
       for (var j = 0; j <= 9; j++) {
         if (board[i][j] != null && board[i][j]!.playerId == 2 &&
-            this.board[i][j]!.isQueen) {
+            board[i][j]!.isQueen) {
           for (var k = 1; i + k <= 9 || i - k >= 0 || j + k <= 9 ||
               j - k >= 0; k++) {
             if (i - k >= 0 && j + k <= 9 && board[i - k][j + k] == null) {
@@ -888,10 +929,10 @@ class DameGame {
     return false;
   }
 
-  Future<List<int>> simulateComputerMoveWithMiniMax() {
+  Future<List<int>> simulateComputerMoveWithMiniMax() async {
 
     // Find moves which beat mit jedem Stein
-    Move optimalMove = findMovesWhichBeat(board, currentPlayer);
+    Move optimalMove = await findMovesWhichBeat([], currentPlayer);
     print('Optimal move ' + optimalMove.toString());
     // Makes ideal move if possible
     if (optimalMove.getPiece() != null) {
@@ -903,7 +944,10 @@ class DameGame {
     } else {
       List<List<GamePiece?>> boardCopy = board.map((list) => List<GamePiece?>.from(list))
           .toList();
-      MinimaxResult minimaxRes = minimax(
+
+      print('HERE WE GO MINIMAX START!!!!!');
+
+      MinimaxResult minimaxRes = await minimax(
           boardCopy, 3, -10000000, 10000000, true, []);
       print(minimaxRes.path.toString() + ' is FINAL RESULT' + minimaxRes.score.toString());
       for (var node in minimaxRes.path) {
@@ -932,325 +976,213 @@ class DameGame {
     }
   }
 
-    List<Move> generateMoves(List<Move> path, bool isMaxPlayer) {
-      List<Move> possibleMoves = [];
-      List<Move> foundCleanMoves = [];
+  Future<List<Move>> generateMoves(List<Move> path, bool isMaxPlayer) async {
+    List<Move> possibleMoves = [];
 
-      var playerGeneratingFor = 1;
-      if (isMaxPlayer) {
-        playerGeneratingFor = 2;
-      }
+    var playerGeneratingFor = 1;
+    if (isMaxPlayer == true) {
+      playerGeneratingFor = 2;
+    }
 
-      List<List<GamePiece?>> currentBoard = board.map((list) => List<GamePiece?>.from(list))
-          .toList();
+    List<List<GamePiece?>> currentBoard = board.map((list) => List<GamePiece?>.from(list))
+        .toList();
 
-      for (var move = path.length - 1; move >= 0; move--) {
-        currentBoard = applyMove(currentBoard, path[move]);
-      }
+    for (var move = path.length - 1; move >= 0; move--) {
+      currentBoard = await applyMove(currentBoard, path[move]);
+    }
 
-      var beatingMoveExists = false;
-      print('FIND BEATING MOVES ' + playerGeneratingFor.toString() +
-          ' WIT PATH ' + path.toString());
-      var beatingMove = findMovesWhichBeat(currentBoard, playerGeneratingFor);
-      print(beatingMove.toString() + 'MOVE');
-      var beatingPiece = beatingMove.getPiece();
-      print(beatingPiece.toString() + 'PIECE');
-      if (beatingPiece != null) {
-        print('BEATING MOVE FOUND ' + beatingMove.toString());
-        beatingMoveExists = true;
-      }
-      for (var row in currentBoard) {
-        //console.log(currentBoard[row], 'Row', row, 'of board')
-      }
-      for (var row = 0; row < 10; row++) {
-        for (var col = 0; col < 10; col++) {
-          var piece = currentBoard[row][col];
+    var beatingMoveExists = false;
+    print('FIND BEATING MOVES $playerGeneratingFor WIT PATH $path');
+    var beatingMove = await findMovesWhichBeat(path, playerGeneratingFor);
+    print('${beatingMove}MOVE');
+    var beatingPiece = beatingMove.getPiece();
+    print('${beatingPiece}PIECE');
+    if (beatingPiece != null) {
+      print('BEATING MOVE FOUND $beatingMove');
+      beatingMoveExists = true;
+    }
+    for (var row in currentBoard) {
+      //console.log(currentBoard[row], 'Row', row, 'of board')
+    }
+    for (var row = 0; row < 10; row++) {
+      for (var col = 0; col < 10; col++) {
+        var piece = currentBoard[row][col];
 
-          //console.log(piece, 'PIECE FROM GENERATE MOVES IS AT', row, col)
-          if (piece != null) {
-            // For Player 1 ~ means Player = false
-            if (!piece.isQueen && piece.playerId == playerGeneratingFor &&
-                playerGeneratingFor == 2) {
-              if (isValidMove(
-                  col, row, col + 1, row - 1, currentBoard,
-                  2)) {
-                if (!beatingMoveExists || (beatingMoveExists &&
-                    checkAndRemoveOppBeaten(
-                        col,
-                        row,
-                        col + 1,
-                        row - 1,
-                        true,
-                        currentBoard,
-                        playerGeneratingFor) != null)) {
-                  possibleMoves.add(new Move(
-                      piece, col + 1, row - 1, col, row));
-                } else {
-                  //console.log('BEATING MOVES BLOCKED + - 1')
-                }
-              } else {
-                //console.log('VALID MOVES SAGT NEIN + - 1')
-              }
-              if (isValidMove(
-                  col, row, col - 1, row - 1, currentBoard,
-                  2)) {
-                if (!beatingMoveExists || (beatingMoveExists &&
-                    checkAndRemoveOppBeaten(
-                        col,
-                        row,
-                        col - 1,
-                        row - 1,
-                        true,
-                        currentBoard,
-                        playerGeneratingFor) != null)) {
-                  possibleMoves.add(new Move(
-                      piece, col - 1, row - 1, col, row));
-                } else {
-                  //console.log('BEATING MOVES BLOCKED - - 1')
-                }
-              } else {
-                //console.log('VALID MOVES SAGT NEIN - - 1')
+        //console.log(piece, 'PIECE FROM GENERATE MOVES IS AT', row, col)
+        if (piece != null) {
+          // For Player 1 ~ means Player = false
+          if (!piece.isQueen && piece.playerId == playerGeneratingFor &&
+              playerGeneratingFor == 2) {
+            if (await isValidMove(
+                col, row, col + 1, row - 1, path,
+                2)) {
+
+                possibleMoves.add(Move(
+                    piece, col + 1, row - 1, col, row));
+
+            } else {
+              //console.log('VALID MOVES SAGT NEIN + - 1')
+            }
+            if (await isValidMove(
+                col, row, col - 1, row - 1, path,
+                2)) {
+
+                possibleMoves.add(Move(
+                    piece, col - 1, row - 1, col, row));
+
+            } else {
+              //console.log('VALID MOVES SAGT NEIN - - 1')
+
+            }
+            if (await isValidMove(
+                col, row, col + 2, row - 2, path,
+                2)) {
+
+                possibleMoves.add(Move(
+                    piece, col + 2, row - 2, col, row));
+
+            } else {
+              //console.log('VALID MOVES SAGT NEIN + - 2')
+
+            }
+            if (await isValidMove(
+                col, row, col - 2, row - 2, path,
+                2)) {
+
+                possibleMoves.add(Move(
+                    piece, col - 2, row - 2, col, row));
+
+            } else {
+              //console.log('VALID MOVES SAGT NEIN - - 2')
+
+            }
+          } else if (!piece.isQueen && piece.playerId == playerGeneratingFor &&
+              playerGeneratingFor == 1) {
+            //console.log('GENERATING FOR PLAYER 1')
+            if (await isValidMove(
+                col, row, col + 1, row + 1, path,
+                1)) {
+
+                //console.log('ADDED MOVES')
+                possibleMoves.add(Move(
+                    piece, col + 1, row + 1, col, row));
+
+            } else {
+              //console.log('VALID MOVES SAGT NEIN + + 1'
+            }
+            if (await isValidMove(
+                col, row, col - 1, row + 1, path,
+                1)) {
+              //console.log('Simple billo check', currentBoard[6][4])
+
+                //console.log('ADDED MOVES')
+                possibleMoves.add(Move(
+                    piece, col - 1, row + 1, col, row));
+
+            } else {
+              //console.log('VALID MOVES SAGT NEIN - + 1')
+            }
+            if (await isValidMove(
+                col, row, col + 2, row + 2, path,
+                1)) {
+
+                //console.log('ADDED MOVES')
+                possibleMoves.add(Move(
+                    piece, col + 2, row + 2, col, row));
+
+            } else {
+              print('VALID MOVES SAGT NEIN - + 2' + col.toString() + row.toString() +
+                  (col + 2).toString() + (row + 2).toString());
+            }
+            if (await isValidMove(
+                col, row, col - 2, row + 2, path,
+                1)) {
+              //console.log(!beatingMoveExists, beatingMoveExists ,this.checkAndRemoveOppBeaten(col, row, Number(col) - 2, Number(row) + 2, true, currentBoard, playerGeneratingFor))
+
+                //console.log('ADDED MOVES')
+                possibleMoves.add(Move(
+                    piece, col - 2, row + 2, col, row));
+
+            } else {
+              print('VALID MOVES SAGT NEIN - + 2' + col.toString() + row.toString() +
+                  (col - 2).toString() + (row + 2).toString());
+            }
+          } else if (piece.isQueen && piece.playerId == playerGeneratingFor) {
+            for (var i = 1; i < 10; i++) {
+              if (col - i >= 0 && row + i < 10 && await isValidMove(
+                  col, row, col - i, row + i, path,
+                  playerGeneratingFor)) {
+
+                  possibleMoves.add(Move(
+                      piece, col - i, row + i, col, row));
 
               }
-              if (isValidMove(
-                  col, row, col + 2, row - 2, currentBoard,
-                  2)) {
-                if (!beatingMoveExists || (beatingMoveExists &&
-                    checkAndRemoveOppBeaten(
-                        col,
-                        row,
-                        col + 2,
-                        row - 2,
-                        true,
-                        currentBoard,
-                        playerGeneratingFor) != null)) {
-                  possibleMoves.add(new Move(
-                      piece, col + 2, row - 2, col, row));
-                } else {
-                  //console.log('BEATING MOVES BLOCKED + - 2')
-                }
-              } else {
-                //console.log('VALID MOVES SAGT NEIN + - 2')
+              if (col - i >= 0 && row - i >= 0 && await isValidMove(
+                  col, row, col - i, row - i, path,
+                  playerGeneratingFor)) {
+
+                  possibleMoves.add(Move(
+                      piece, col - i, row - i, col, row));
 
               }
-              if (isValidMove(
-                  col, row, col - 2, row - 2, currentBoard,
-                  2)) {
-                if (!beatingMoveExists || (beatingMoveExists &&
-                    checkAndRemoveOppBeaten(
-                        col,
-                        row,
-                        col - 2,
-                        row - 2,
-                        true,
-                        currentBoard,
-                        playerGeneratingFor) != null)) {
-                  possibleMoves.add(new Move(
-                      piece, col - 2, row - 2, col, row));
-                } else {
-                  //console.log('BEATING MOVES BLOCKED - - 2')
-                }
-              } else {
-                //console.log('VALID MOVES SAGT NEIN - - 2')
+              if (col + i < 10 && row + i < 10 && await isValidMove(
+                  col, row, col + i, row + i, path,
+                  playerGeneratingFor)) {
+
+                  possibleMoves.add(Move(
+                      piece, col + i, row + i, col, row));
 
               }
-            } else
-            if (!piece.isQueen && piece.playerId == playerGeneratingFor &&
-                playerGeneratingFor == 1) {
-              //console.log('GENERATING FOR PLAYER 1')
-              if (isValidMove(
-                  col, row, col + 1, row + 1, currentBoard,
-                  1)) {
-                if (!beatingMoveExists || (beatingMoveExists &&
-                    checkAndRemoveOppBeaten(
-                        col,
-                        row,
-                        col + 1,
-                        row + 1,
-                        true,
-                        currentBoard,
-                        playerGeneratingFor) != null)) {
-                  //console.log('ADDED MOVES')
-                  possibleMoves.add(new Move(
-                      piece, col + 1, row + 1, col, row));
-                } else {
-                  //console.log('BEATING MOVES BLOCKED + + 1')
-                }
-              } else {
-                //console.log('VALID MOVES SAGT NEIN + + 1'
-              }
-              if (isValidMove(
-                  col, row, col - 1, row + 1, currentBoard,
-                  1)) {
-                //console.log('Simple billo check', currentBoard[6][4])
-                if (!beatingMoveExists || (beatingMoveExists &&
-                    checkAndRemoveOppBeaten(
-                        col,
-                        row,
-                        col - 1,
-                        row + 1,
-                        true,
-                        currentBoard,
-                        playerGeneratingFor) != null)) {
-                  //console.log('ADDED MOVES')
-                  possibleMoves.add(new Move(
-                      piece, col - 1, row + 1, col, row));
-                } else {
-                  //console.log('BEATING MOVES BLOCKED - + 1')
-                }
-              } else {
-                //console.log('VALID MOVES SAGT NEIN - + 1')
-              }
-              if (isValidMove(
-                  col, row, col + 2, row + 2, currentBoard,
-                  1)) {
-                if (!beatingMoveExists || (beatingMoveExists &&
-                    checkAndRemoveOppBeaten(
-                        col,
-                        row,
-                        col + 2,
-                        row + 2,
-                        true,
-                        currentBoard,
-                        playerGeneratingFor) != null)) {
-                  //console.log('ADDED MOVES')
-                  possibleMoves.add(new Move(
-                      piece, col + 2, row + 2, col, row));
-                } else {
-                  //console.log('BEATING MOVES BLOCKED + + 2')
-                }
-              } else {
-                //console.log('VALID MOVES SAGT NEIN + + 2', col, row, Number(col) + 2, Number(row) + 2)
-              }
-              if (isValidMove(
-                  col, row, col - 2, row + 2, currentBoard,
-                  1)) {
-                //console.log(!beatingMoveExists, beatingMoveExists ,this.checkAndRemoveOppBeaten(col, row, Number(col) - 2, Number(row) + 2, true, currentBoard, playerGeneratingFor))
-                if (!beatingMoveExists || (beatingMoveExists &&
-                    checkAndRemoveOppBeaten(
-                        col,
-                        row,
-                        col - 2,
-                        row + 2,
-                        true,
-                        currentBoard,
-                        playerGeneratingFor) != null)) {
-                  //console.log('ADDED MOVES')
-                  possibleMoves.add(new Move(
-                      piece, col - 2, row + 2, col, row));
-                } else {
-                  //console.log('BEATING MOVES BLOCKED - + 2')
-                }
-              } else {
-                //console.log('VALID MOVES SAGT NEIN - + 2', col, row, Number(col) - 2, Number(row) + 2)
-              }
-            } else if (piece.isQueen && piece.playerId == playerGeneratingFor) {
-              for (var i = 1; i < 10; i++) {
-                if (col - i >= 0 && row + i < 10 && isValidMove(
-                    col, row, col - i, row + i, currentBoard,
-                    playerGeneratingFor)) {
-                  if (!beatingMoveExists || (beatingMoveExists &&
-                      this.checkAndRemoveOppBeaten(
-                          col,
-                          row,
-                          col - i,
-                          row + i,
-                          true,
-                          currentBoard,
-                          playerGeneratingFor) != null)) {
-                    possibleMoves.add(new Move(
-                        piece, col - i, row + i, col, row));
-                  }
-                }
-                if (col - i >= 0 && row - i >= 0 && isValidMove(
-                    col, row, col - i, row - i, currentBoard,
-                    playerGeneratingFor)) {
-                  if (!beatingMoveExists || (beatingMoveExists &&
-                      checkAndRemoveOppBeaten(
-                          col,
-                          row,
-                          col - i,
-                          row - i,
-                          true,
-                          currentBoard,
-                          playerGeneratingFor) != null)) {
-                    possibleMoves.add(new Move(
-                        piece, col - i, row - i, col, row));
-                  }
-                }
-                if (col + i < 10 && row + i < 10 && isValidMove(
-                    col, row, col + i, row + i, currentBoard,
-                    playerGeneratingFor)) {
-                  if (!beatingMoveExists || (beatingMoveExists &&
-                      checkAndRemoveOppBeaten(
-                          col,
-                          row,
-                          col + i,
-                          row + i,
-                          true,
-                          currentBoard,
-                          playerGeneratingFor) != null)) {
-                    possibleMoves.add(new Move(
-                        piece, col + i, row + i, col, row));
-                  }
-                }
-                if (col + i < 10 && row - i >= 0 && isValidMove(
-                    col, row, col + i, row - i, currentBoard,
-                    playerGeneratingFor)) {
-                  if (!beatingMoveExists || (beatingMoveExists &&
-                      checkAndRemoveOppBeaten(
-                          col,
-                          row,
-                          col + i,
-                          row - i,
-                          true,
-                          currentBoard,
-                          playerGeneratingFor) != null)) {
-                    possibleMoves.add(new Move(
-                        piece, col + i, row - i, col, row));
-                  }
-                }
+              if (col + i < 10 && row - i >= 0 && await isValidMove(
+                  col, row, col + i, row - i, path,
+                  playerGeneratingFor)) {
+
+                  possibleMoves.add(Move(
+                      piece, col + i, row - i, col, row));
+
               }
             }
           }
-
-          // Make random queen move
         }
 
-        for (var move in possibleMoves) {
-          //console.log(move, ':', JSON.stringify(possibleMoves[move]) + '\n')
-        }
-
-
-
-        for (var move in possibleMoves) {
-          var moveInQ = checkAndRemoveOppBeaten(
-              move.getStartX(),
-              move.getStartY(),
-              move.getEndX(),
-              move.getEndY(),
-              true,
-              currentBoard,
-              playerGeneratingFor);
-          if (moveInQ != null) {
-            print('SETTING BOOL TRUE BECAUSE OF' + move.toString());
-            foundCleanMoves.add(new Move(
-                move.getPiece(), move.getEndX(),
-                move.getEndY(), move.getStartX(),
-                move.getStartY()));
-          }
-        }
-
-
+        // Make random queen move
       }
-      if (foundCleanMoves.isNotEmpty) {
-        return foundCleanMoves;
-      } else {
-        return possibleMoves;
+    }
+    for (var move in possibleMoves) {
+      print('${move.getStartX()}${move.getStartY()}${move.getEndX()}${move.getEndY()}\n');
+    }
+
+    List<Move> foundCleanMoves = [];
+
+    for (var move in possibleMoves) {
+      var moveInQ = checkAndRemoveOppBeaten(
+          move.getStartX(),
+          move.getStartY(),
+          move.getEndX(),
+          move.getEndY(),
+          true,
+          currentBoard,
+          playerGeneratingFor);
+      if (moveInQ != null) {
+        print('SETTING BOOL TRUE BECAUSE OF' + move.toString() + move.getStartX().toString()
+              + move.getStartY().toString() + move.getEndX().toString() + move.getEndY().toString());
+        foundCleanMoves.add(Move(
+            move.getPiece(), move.getEndX(),
+            move.getEndY(), move.getStartX(),
+            move.getStartY()));
       }
     }
 
-    List<List<GamePiece?>> applyMove(List<List<GamePiece?>> board, Move move) {
+    if (foundCleanMoves.isNotEmpty) {
+      print('RETURNED MODIFIED ARRAY');
+      return foundCleanMoves;
+    } else {
+      print('RETURNED UNMODIFIED ARRAY');
+      return possibleMoves;
+    }
+  }
+
+    Future<List<List<GamePiece?>>> applyMove(List<List<GamePiece?>> board, Move move) {
 
       /**
           const beatenPiece: GamePiece | null = this.checkAndRemoveOppBeaten(startCol, startRow, endCol, endRow, true);
@@ -1276,13 +1208,13 @@ class DameGame {
       board[move.getStartY()][move.getStartX()] = null;
       //console.log(board[move.getStartY()][move.getStartX()], ' Content of old location')
 
-      return board;
+      return Future.value(board);
 
       //const beatenPiece = this.checkAndRemoveOppBeaten(startCol, startRow, endCol, endRow, false);
 
     }
 
-    int evaluateState(List<List<GamePiece?>> pBoard, List<Move> path) {
+    Future<int> evaluateState(List<List<GamePiece?>> pBoard, List<Move> path) async {
       List<List<GamePiece?>> evaluationBoardCopy = board.map((list) =>
         List<GamePiece?>.from(list)).toList();
       var returnValueForBeat = 0;
@@ -1293,7 +1225,7 @@ class DameGame {
 
       // Apply first move of simulation, which will be a maxi move
       for (var move = path.length - 1; move >= 0; move--) {
-        evaluationBoardCopy = applyMove(evaluationBoardCopy, path[move]);
+        evaluationBoardCopy = await applyMove(evaluationBoardCopy, path[move]);
         var potBeatenPiece = checkAndRemoveOppBeaten(
             path[move].getStartX(),
             path[move].getStartY(),
@@ -1359,7 +1291,7 @@ class DameGame {
                     .indexOf(piece) - 1] == null ||
                     evaluationBoardCopy[evaluationBoardCopy.indexOf(row) -
                         1][row.indexOf(piece) - 1]?.playerId == 2)) {
-              addValue++;
+              addValue = addValue + 10;
             }
             if (evaluationBoardCopy.indexOf(row) - 1 >= 0 &&
                 row.indexOf(piece) + 1 < 10 &&
@@ -1367,7 +1299,7 @@ class DameGame {
                     .indexOf(piece) + 1] == null ||
                     evaluationBoardCopy[evaluationBoardCopy.indexOf(row) -
                         1][row.indexOf(piece) + 1]?.playerId == 2)) {
-              addValue++;
+              addValue = addValue + 10;
             }
 
             if (evaluationBoardCopy.indexOf(row) - 1 >= 0 &&
@@ -1382,6 +1314,7 @@ class DameGame {
             }
             if (evaluationBoardCopy.indexOf(row) - 1 >= 0 &&
                 row.indexOf(piece) + 1 < 10 && row.indexOf(piece) - 1 >= 0 &&
+                evaluationBoardCopy.indexOf(row) + 1 < 10 &&
                 (evaluationBoardCopy[evaluationBoardCopy.indexOf(row) - 1][row
                     .indexOf(piece) + 1] != null &&
                     evaluationBoardCopy[evaluationBoardCopy.indexOf(row) -
@@ -1407,12 +1340,12 @@ class DameGame {
 
   }
 
-  MinimaxResult minimax(List<List<GamePiece?>> pBoard, int depth, int alpha,
-      int beta, bool isMaximizingPlayer, List<Move> path) {
+  Future<MinimaxResult> minimax(List<List<GamePiece?>> pBoard, int depth, int alpha,
+      int beta, bool isMaximizingPlayer, List<Move> path) async {
     print(depth.toString() + ' DEEEEEPNESSSS');
     if (depth == 0 || checkWin(pBoard)) {
       return MinimaxResult(
-          score: evaluateState(pBoard, path), path: path);
+          score: await evaluateState(pBoard, path), path: path);
     }
 
     List<List<GamePiece?>> newState = pBoard.map((list) => List<GamePiece?>.from(list))
@@ -1421,13 +1354,13 @@ class DameGame {
     if (isMaximizingPlayer) {
       MinimaxResult maxEval = MinimaxResult(
           score: -10000000, path: []);
-      for (var move in generateMoves(path, true)) {
+      for (var move in await generateMoves(path, true)) {
         print('CURRENT MOVE $move');
         List<List<GamePiece?>> tempState = newState.map((list) =>
         List<GamePiece?>.from(list)).toList();
 
-        var value = minimax(
-            applyMove(tempState, move), depth - 1, alpha, beta, false, [move, ...path]);
+        var value = await minimax(
+            await applyMove(tempState, move), depth - 1, alpha, beta, false, [move, ...path]);
         //console.log(path, 'Current path')
         if (value.score >= maxEval.score) {
           maxEval.score = value.score;
@@ -1442,17 +1375,17 @@ class DameGame {
          */
 
       }
-      return maxEval;
+      return Future.value(maxEval);
     } else {
       MinimaxResult minEval = MinimaxResult(
           score: 10000000, path: []);
-      for (var move in generateMoves(path, false)) {
+      for (var move in await generateMoves(path, false)) {
         print('CURRENT MOVE' + move.toString());
         List<List<GamePiece?>> tempState = newState.map((list) =>
         List<GamePiece?>.from(list)).toList();
 
-        var value = minimax(
-            applyMove(tempState, move), depth - 1, alpha, beta, true,
+        var value = await minimax(
+            await applyMove(tempState, move), depth - 1, alpha, beta, true,
             [move, ...path]);
         if (value.score <= minEval.score) {
           minEval.score = value.score;
@@ -1465,7 +1398,7 @@ class DameGame {
             }
          */
       }
-      return minEval;
+      return Future.value(minEval);
     }
   }
 }
@@ -1497,6 +1430,11 @@ class Move {
 
   int getStartY() {
     return startY;
+  }
+
+  @override
+  String toString(){
+    return 'MOVE from x:${startX} y: ${startY} to x:${endX} y:${endY}';
   }
 }
 

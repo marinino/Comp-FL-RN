@@ -287,10 +287,10 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
 
 
     bool newQueen = game.checkForQueenConv();
-
+    var optimalMove = await game.findMovesWhichBeat([], game.currentPlayer);
 
     // Changes player, if futher beat is not possible or there was no beat in the first place
-    if(beatenPiece != null && game.findMovesWhichBeat(game.board, game.currentPlayer).getPiece() != null && newQueen == false){
+    if(beatenPiece != null && optimalMove.getPiece() != null && newQueen == false){
       game.stateString = 'Spieler $game.currentPlayer bleibt dran';
     } else {
       game.currentPlayer = 3 - game.currentPlayer;
