@@ -1252,7 +1252,7 @@ class DameGame {
       for (var row in evaluationBoardCopy) {
         for (var piece in row) {
           if (piece != null) {
-            int colValue = 0;
+            var colValue = 0;
             var rowValue = 0;
             var addValue = 0;
             var subValue = 0;
@@ -1260,23 +1260,23 @@ class DameGame {
             if (evaluationBoardCopy.indexOf(row) == 0) {
               rowValue = 35;
             } else if (evaluationBoardCopy.indexOf(row) == 1) {
-              rowValue == 1;
+              rowValue = 1;
             } else if (evaluationBoardCopy.indexOf(row) == 2) {
-              rowValue == 2;
+              rowValue = 2;
             } else if (evaluationBoardCopy.indexOf(row) == 3) {
-              rowValue == 4;
+              rowValue = 4;
             } else if (evaluationBoardCopy.indexOf(row) == 4) {
-              rowValue == 7;
+              rowValue = 7;
             } else if (evaluationBoardCopy.indexOf(row) == 5) {
-              rowValue == 11;
+              rowValue = 11;
             } else if (evaluationBoardCopy.indexOf(row) == 6) {
-              rowValue == 16;
+              rowValue = 16;
             } else if (evaluationBoardCopy.indexOf(row) == 7) {
-              rowValue == 22;
+              rowValue = 22;
             } else if (evaluationBoardCopy.indexOf(row) == 8) {
-              rowValue == 29;
+              rowValue = 29;
             } else if (evaluationBoardCopy.indexOf(row) == 9) {
-              rowValue == 37;
+              rowValue = 37;
             }
 
             if (row.indexOf(piece) < 5) {
@@ -1304,6 +1304,7 @@ class DameGame {
 
             if (evaluationBoardCopy.indexOf(row) - 1 >= 0 &&
                 row.indexOf(piece) - 1 >= 0 && row.indexOf(piece) + 1 < 10 &&
+                evaluationBoardCopy.indexOf(row) + 1 < 10 &&
                 (evaluationBoardCopy[evaluationBoardCopy.indexOf(row) - 1][row
                     .indexOf(piece) - 1] != null &&
                     evaluationBoardCopy[evaluationBoardCopy.indexOf(row) -
