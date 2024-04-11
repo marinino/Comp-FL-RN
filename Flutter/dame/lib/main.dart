@@ -81,7 +81,7 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
 
 
 
-  void onFieldTap(int row, int column) {
+  Future<void> onFieldTap(int row, int column) async {
     if(selectedX == -1){
       if(game.board[row][column]?.playerId != game.currentPlayer){
         return;
@@ -99,9 +99,12 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
     }
     else {
 
-      game.move(selectedX ,selectedY , column, row);
-      _startAnimation(selectedX ,selectedY , column, row);
-      setAfterAnimationValues(selectedX ,selectedY , column, row);
+      var completedMove = await game.move(selectedX ,selectedY , column, row);
+      if(completedMove == true){
+        _startAnimation(selectedX ,selectedY , column, row);
+        setAfterAnimationValues(selectedX ,selectedY , column, row);
+      }
+
 
 
       selectedX = -1;
@@ -291,10 +294,10 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
 
     // Changes player, if futher beat is not possible or there was no beat in the first place
     if(beatenPiece != null && optimalMove.getPiece() != null && newQueen == false){
-      game.stateString = 'Spieler $game.currentPlayer bleibt dran';
+      game.stateString = 'Spieler ${game.currentPlayer} bleibt dran';
     } else {
       game.currentPlayer = 3 - game.currentPlayer;
-      game.stateString = 'Spieler $game.currentPlayer ist dran';
+      game.stateString = 'Spieler ${game.currentPlayer} ist dran';
     }
 
     if(game.checkWin(game.board)){
