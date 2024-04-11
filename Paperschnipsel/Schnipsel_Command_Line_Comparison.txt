@@ -1,6 +1,6 @@
 Flutter Commands
 
-- flutter analyze: Analyzes the dart code of the project, can be helpful no question. The thing is with the linter the issues are displayed in Android Studio in this case. The linter also often offers quick fixes to remove the warnings and dirty code snippets. So overall the linter is probably the tool which is easier to use and has exactly the same functionality as the flutter analyze, which makes the command kind of obsolete.
+- flutter analyze: Analyzes the dart code of the project, can be helpful no question. The thing is with the linter the issues are displayed in Android Studio in this case. The linter also often offers quick fixes to remove the warnings and dirty code snippets. So overall the linter is probably the tool which is easier to use and has exactly the same functionality as the flutter analyze, which makes the command kind of obsolete. XXX
 
 - flutter create: Creates a new Flutter project in the specified directory.  XXX
 
@@ -13,7 +13,7 @@ Flutter Commands
         - appbundle for Android App Bundles
         - macos, windows, linux for desktop platforms XXX
 
-- flutter test: Runs unit and widget tests in your project.
+- flutter test: Runs unit and widget tests in your project. XXX
 
 - flutter doctor: Checks environment which is especially useful for setup and a big strength of flutter compared to frameworks which do not have this command. Something which may be added here is the fact that the command wotks really well and genuinly is a big help. XXX
 
@@ -27,11 +27,11 @@ Flutter Commands
 
 - flutter update: Updates the flutter SDK XXX
 
-- flutter attach: Attaches the command line to a running application to use it in there
+- flutter attach: Attaches the command line to a running application to use it in there XXX
 
-- flutter devices: Lists all connected devices that can run a Flutter app. Was never used here as Android Studio has a display for that
+- flutter devices: Lists all connected devices that can run a Flutter app. Was never used here as Android Studio has a display for that XXX
 
-- flutter emulators: Manages available emulators. Can list, launch, and create emulators. Again Android Studio has something there
+- flutter emulators: Manages available emulators. Can list, launch, and create emulators. Again Android Studio has something there XXX
 
 - flutter config: Displays the current Flutter configuration and allows you to change global settings. There are a bunch of settings in order to adjust the project to your preferences, like en- or disableing support for certain plattforms for example. XXX
 
@@ -55,9 +55,9 @@ React Native Commands
 
 - npx react-native restart: Used for hot restart
 
-- npm test: Runs test runner for the project
+- npm test: Runs test runner for the project XXX
 
-- npm run lint: Runs linter for JS Code
+- npm run lint: Runs linter for JS Code XXX
 
 - npm install <package> or yarn add <package>: Install packages XXX
 
