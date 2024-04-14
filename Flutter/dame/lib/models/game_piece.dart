@@ -5,7 +5,7 @@ class GamePiece {
 
   GamePiece({required this.playerId, this.isQueen = false, this.isAnimated = false});
 
-  // Eine Methode, um den Spielstein zur Dame zu machen
+  // Promotes piece to crowned piece
   void promoteToQueen() {
     isQueen = true;
   }
@@ -16,6 +16,6 @@ class GamePiece {
 
   @override
   String toString() {
-    return 'GamePiece: Spieler($playerId), isQueen: $isQueen';
+    return 'GamePiece: Player($playerId), isQueen: $isQueen';
   }
 }

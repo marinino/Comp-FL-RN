@@ -39,7 +39,6 @@ class PlotScreen extends StatefulWidget {
 }
 
 class _PlotScreenState extends State<PlotScreen> {
-  @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
     throw UnimplementedError();
@@ -75,9 +74,6 @@ class _PlotScreenState extends State<PlotScreen> {
     for(var el in dashRaw){
       dashData.add(DataPoint(el['Date'], el['Currency_Value']));
     }
-
-    log(bitcoinData.toString());
-
   }
 
   void loadEthereumData() async {
@@ -87,9 +83,6 @@ class _PlotScreenState extends State<PlotScreen> {
     for(var el in ethereumRaw){
       ethereumData.add(DataPoint(el['Date'], el['Currency_Value']));
     }
-
-    log(ethereumData.toString());
-
   }
 
   void loadStellarData() async {
@@ -99,9 +92,6 @@ class _PlotScreenState extends State<PlotScreen> {
     for(var el in stellarRaw){
       stellarData.add(DataPoint(el['Date'], el['Currency_Value']));
     }
-
-    log(stellarData.toString());
-
   }
 
   void loadXPRData() async {
@@ -111,9 +101,6 @@ class _PlotScreenState extends State<PlotScreen> {
     for(var el in xprRaw){
       xprData.add(DataPoint(el['Date'], el['Currency_Value']));
     }
-
-    log(xprData.toString());
-
   }
 
   @override
@@ -133,10 +120,9 @@ class _PlotScreenState extends State<PlotScreen> {
   var currentTrend = 'Neutral';
   var currentTrendColor = 'black';
 
-  void changeDataDisplyed() {
+  void changeDataDisplayed() {
     if(selectedCurrency?.label == 'Bitcoin'){
       updateDisplayData(bitcoinData);
-
     } else if(selectedCurrency?.label == "Ethereum") {
       updateDisplayData(ethereumData);
     } else if(selectedCurrency?.label == "XPR") {
@@ -146,7 +132,6 @@ class _PlotScreenState extends State<PlotScreen> {
     } else if(selectedCurrency?.label == "Stellar") {
       updateDisplayData(stellarData);
     }
-
     updateCurrentTrend();
   }
 
@@ -158,7 +143,6 @@ class _PlotScreenState extends State<PlotScreen> {
 
   void updateCurrentTrend(){
     setState(() {
-
       if(dataDisplayed.last.value > dataDisplayed.elementAt(dataDisplayed.length - 2).value){
         currentTrend = 'Rising';
       } else if(dataDisplayed.last.value < dataDisplayed.elementAt(dataDisplayed.length - 2).value){
@@ -166,7 +150,6 @@ class _PlotScreenState extends State<PlotScreen> {
       } else {
         currentTrend = 'Neutral';
       }
-
     });
   }
 
@@ -190,7 +173,7 @@ class _PlotScreenState extends State<PlotScreen> {
     // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        title: Text('Currency Trends'),  // Header label added here
+        title: const Text('Currency Trends'),  // Header label added here
         centerTitle: true,
       ),
       body: SafeArea(
@@ -201,7 +184,6 @@ class _PlotScreenState extends State<PlotScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-
                   DropdownMenu<CurrencyLabel>(
                     initialSelection: CurrencyLabel.bitcoin,
                     controller: colorController,
@@ -215,7 +197,7 @@ class _PlotScreenState extends State<PlotScreen> {
                       setState(() {
                         selectedCurrency = currency;
                       });
-                      changeDataDisplyed();
+                      changeDataDisplayed();
                     },
                     dropdownMenuEntries: CurrencyLabel.values
                         .map<DropdownMenuEntry<CurrencyLabel>>(
@@ -230,45 +212,37 @@ class _PlotScreenState extends State<PlotScreen> {
                           );
                         }).toList(),
                   ),
-                  SizedBox(height: 20),
-                  Text('Aktueller Wert: ' + dataDisplayed.last.value.toString(),
-                    style: TextStyle(
+                  const SizedBox(height: 20),
+                  Text('Current value: ${dataDisplayed.last.value}',
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20
                     ),
                   ),
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
                   //SizedBox(height: 20),
                   SfCartesianChart(
-
                       // Initialize category axis
-                      primaryXAxis: CategoryAxis(
-
+                      primaryXAxis: const CategoryAxis(
                       ),
-                      primaryYAxis: NumericAxis(
+                      primaryYAxis: const NumericAxis(
                         minimum: 0,
                         maximum: 2,
                       ),
-                      // Enable legend
-                      legend: Legend(isVisible: false),
-                      // Enable tooltip
+                      legend: const Legend(isVisible: false),
                       tooltipBehavior: _tooltipBehavior,
-
                       series: <LineSeries<DataPoint, String>>[
                         LineSeries<DataPoint, String>(
-
-                          // Bind data source
-
                             dataSource:  dataDisplayed,
                             xValueMapper: (DataPoint point, _) => point.date,
                             yValueMapper: (DataPoint point, _) => point.value,
                             // Enable data label
-                            dataLabelSettings: DataLabelSettings(isVisible: false)
+                            dataLabelSettings: const DataLabelSettings(isVisible: false)
                         )
                       ]
                   ),
-                  SizedBox(height: 20),
-                  Text('Current Trend: ' + currentTrend,
+                  const SizedBox(height: 20),
+                  Text('Current Trend: $currentTrend',
                     style: TextStyle(
                       color: setColorForTrend(),
                       fontWeight: FontWeight.bold,
@@ -276,17 +250,13 @@ class _PlotScreenState extends State<PlotScreen> {
                     ),
                   ),
                 ],
-
               ),
             ),
-
           ],
         ),
       ),
-
     );
   }
-
 }
 
 class DataPoint {
@@ -294,5 +264,5 @@ class DataPoint {
   final String date;
   final double value;
 
-  DataPoint(String this.date, double this.value);
+  DataPoint(this.date, this.value);
 }

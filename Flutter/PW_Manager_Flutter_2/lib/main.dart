@@ -1,23 +1,23 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'generate_password.dart';
 import 'top_home.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 void main() {
   runApp(
     ChangeNotifierProvider(
       create: (context) => ListProvider(),
-      child: MyApp(),
+      child: const MyApp(),
     ),
 
   );
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -25,24 +25,24 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
       ),
-      home: MainScreen(),
+      home: const MainScreen(),
     );
   }
 }
 
 class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
 
-
 class _MainScreenState extends State<MainScreen> {
 
   int _currentIndex = 0; // Index of the current tab
-
   final List<Widget> _screens = [
-    HomeScreen(),
-    SecondScreen(),
+    const HomeScreen(),
+    const SecondScreen(),
   ];
 
   @override
@@ -71,15 +71,13 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-//
-
-
 class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
 
     final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -111,7 +109,6 @@ class ListProvider extends ChangeNotifier {
   ListProvider() {
     loadItems(); // Load items when the provider is initialized
   }
-
   Future<void> loadItems() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     // Assuming you store your items under a single key as a list
