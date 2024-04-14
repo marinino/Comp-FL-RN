@@ -1,15 +1,13 @@
-import 'dart:ffi';
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'top_home.dart';
 import 'main.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class SecondScreen extends StatefulWidget {
+  const SecondScreen({super.key});
+
   @override
   _SecondScreenState createState() => _SecondScreenState();
 }
@@ -26,7 +24,6 @@ class _SecondScreenState extends State<SecondScreen> {
   Widget build(BuildContext context) {
 
     final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -47,9 +44,9 @@ class _SecondScreenState extends State<SecondScreen> {
               children: [
                 Text(
                   'Length of password: $_passwordLength',
-                  style: TextStyle(fontSize: 20.0),
+                  style: const TextStyle(fontSize: 20.0),
                 ),
-                SizedBox(height: 20.0),
+                const SizedBox(height: 20.0),
                 Slider(
                   value: _passwordLength,
                   min: 6,
@@ -60,13 +57,12 @@ class _SecondScreenState extends State<SecondScreen> {
                       _passwordLength = value.roundToDouble();
                     });
                   },
-
                 ),
-                SizedBox(height: 20.0),
+                const SizedBox(height: 20.0),
                 _buildLabelWithButtons('Digits', _digitsValue),
                 _buildLabelWithButtons('Capitals', _capsValue),
                 _buildLabelWithButtons('Symbols', _symbolsValue),
-                SizedBox(height: 20.0),
+                const SizedBox(height: 20.0),
                 Row(
                   children: [
                     ElevatedButton(
@@ -75,29 +71,29 @@ class _SecondScreenState extends State<SecondScreen> {
                           _generatedString = _generateString();
                         });
                       },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.primary,
+                      ),
                       child: Text(
                         'Generate Password',
                         style: TextStyle(
                           color: theme.colorScheme.onPrimary,
                         ),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.primary,
-                      ),
                     ),
-                    SizedBox(width: 16.0), // Adjust the spacing between buttons as needed
+                    const SizedBox(width: 16.0), // Adjust the spacing between buttons as needed
                     ElevatedButton(
                       onPressed: () {
                         openPopUpToSavePassword();
                       },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.secondary, // Adjust the color as needed
+                      ),
                       child: Text(
                         'Save Password',
                         style: TextStyle(
                           color: theme.colorScheme.onPrimary,
                         ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.secondary, // Adjust the color as needed
                       ),
                     ),
                   ],
@@ -128,27 +124,27 @@ class _SecondScreenState extends State<SecondScreen> {
       children: [
         Text(
           '$label: $value',
-          style: TextStyle(fontSize: 16.0),
+          style: const TextStyle(fontSize: 16.0),
         ),
-        SizedBox(height: 8.0),
+        const SizedBox(height: 8.0),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             IconButton(
-              icon: Icon(Icons.add),
+              icon: const Icon(Icons.add),
               onPressed: () {
                 _incrementLabelValue(label);
               },
             ),
             IconButton(
-              icon: Icon(Icons.remove),
+              icon: const Icon(Icons.remove),
               onPressed: () {
                 _decrementLabelValue(label);
               },
             ),
           ],
         ),
-        SizedBox(height: 16.0),
+        const SizedBox(height: 16.0),
       ],
     );
   }
@@ -239,16 +235,16 @@ class _SecondScreenState extends State<SecondScreen> {
               const Text('Enter application:'),
               TextField(
                 controller: applicationInput,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Application name...',
                 ),
               ),
-              SizedBox(height: 30.0),
+              const SizedBox(height: 30.0),
               const Text('Enter E-Mail:'),
               TextField(
                 controller: eMailInput,
-                decoration: InputDecoration(
-                  hintText: 'E-Mail adress...',
+                decoration: const InputDecoration(
+                  hintText: 'E-Mail address...',
                 ),
               ),
             ],
@@ -258,8 +254,7 @@ class _SecondScreenState extends State<SecondScreen> {
               onPressed: () {
                 var listProvider = Provider.of<ListProvider>(context, listen: false);
                 // Do something with the entered text, e.g., print it
-                print('Entered text: ${applicationInput.text}');
-                AlphabeticalListItem item = new AlphabeticalListItem(
+                AlphabeticalListItem item = AlphabeticalListItem(
                     application: applicationInput.text,
                     email: eMailInput.text,
                     password: _generatedString);
@@ -271,18 +266,17 @@ class _SecondScreenState extends State<SecondScreen> {
                 //print(alphabeticalList.listItems.length);
                 Navigator.pop(context);
               },
-              child: Text('Submit'),
+              child: const Text('Submit'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
           ],
         );
       },
     );
-
   }
 }

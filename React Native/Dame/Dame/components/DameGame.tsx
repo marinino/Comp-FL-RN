@@ -62,11 +62,11 @@ export default class DameGame {
   async movePiece(startRow, startCol, endRow, endCol) {
       // Hier könnten Sie die Logik zum Bewegen der Spielsteine implementieren
       // einschließlich der Überprüfung auf gültige Züge und das Schlagen gegnerischer Steine
-      console.log('ICH HAB DIE RICHTIG GERUFEN')
+      //console.log('ICH HAB DIE RICHTIG GERUFEN')
 
       // Prüfen Sie, ob der Zug gültig ist
       if (!this.isValidMove(startCol, startRow, endCol, endRow)) {
-        console.log('DIS MOVE NOT VALID')
+        //console.log('DIS MOVE NOT VALID')
         return false;
       }
 
@@ -74,13 +74,13 @@ export default class DameGame {
       var foundBeatingMove = this.findMovesWhichBeat().getPiece()
       if (beatenPiece == null && foundBeatingMove) {
         this.stateString = `Spieler ${this.currentPlayer} hat die Schlagpflicht verletzt, wähle einen anderen Zug`;
-        console.log('SCHLAGPFLICHT UND SO')
+        //console.log('SCHLAGPFLICHT UND SO')
         return false;
       }
 
       if(foundBeatingMove && foundBeatingMove.isQueen && beatenPiece && !beatenPiece.isQueen){
         stateString = 'Dame schlagen geht vor';
-        console.log('DAME SCHLAGEN')
+        //console.log('DAME SCHLAGEN')
         return false;
       }
 
@@ -89,7 +89,7 @@ export default class DameGame {
       this.board[endRow][endCol] = piece;
       this.board[startRow][startCol] = null;
 
-      console.log('TO DA ANIMATION')
+      //console.log('TO DA ANIMATION')
 
 
 
@@ -867,7 +867,7 @@ export default class DameGame {
             try{
                 // Find moves which beat mit jedem Stein
                 const optimalMove = this.findMovesWhichBeat();
-                console.log('Optimal move', optimalMove)
+                //console.log('Optimal move', optimalMove)
                 // Makes ideal move if possible
                 if(optimalMove.getPiece() != null){
                     await this.movePiece(optimalMove.getStartY(), optimalMove.getStartX(), optimalMove.getEndY(), optimalMove.getEndX())
@@ -875,10 +875,10 @@ export default class DameGame {
                     return;
                 } else {
                     var boardCopy = this.board.map(row => [...row])
-                    let minimaxRes = this.minimax(boardCopy, 3, -Infinity, Infinity, true, [])
-                    console.log(minimaxRes, ' is FINAL RESULT')
+                    let minimaxRes = this.minimax(boardCopy, 5, -Infinity, Infinity, true, [])
+                    //console.log(minimaxRes, ' is FINAL RESULT')
                     for(node in minimaxRes.path){
-                        console.log(minimaxRes.path[node].getPiece())
+                        //console.log(minimaxRes.path[node].getPiece())
                     }
                     console.log(minimaxRes, ' is FINAL RESULT', minimaxRes.path[minimaxRes.path.length - 1].getStartY(), minimaxRes.path[minimaxRes.path.length - 1].getStartX()
                         , minimaxRes.path[minimaxRes.path.length - 1].getEndY(), minimaxRes.path[minimaxRes.path.length - 1].getEndX())
@@ -920,13 +920,13 @@ export default class DameGame {
     }
 
     let beatingMoveExists = false
-    console.log('FIND BEATING MOVES', playerGeneratingFor, 'WIT PATH', path)
+    //console.log('FIND BEATING MOVES', playerGeneratingFor, 'WIT PATH', path)
     let beatingMove = this.findMovesWhichBeat(currentBoard, playerGeneratingFor)
-    console.log(beatingMove, 'MOVE')
+    //console.log(beatingMove, 'MOVE')
     let beatingPiece = beatingMove.getPiece()
-    console.log(beatingPiece, 'PIECE')
+    //console.log(beatingPiece, 'PIECE')
     if(beatingPiece){
-        console.log('BEATING MOVE FOUND', beatingMove)
+        //console.log('BEATING MOVE FOUND', beatingMove)
         beatingMoveExists = true
     }
     for(row in currentBoard){
@@ -1062,7 +1062,7 @@ export default class DameGame {
     for(move in possibleMoves){
         let moveInQ = this.checkAndRemoveOppBeaten(possibleMoves[move].getStartX(), possibleMoves[move].getStartY(), possibleMoves[move].getEndX(), possibleMoves[move].getEndY(), true, currentBoard, playerGeneratingFor)
         if(moveInQ){
-            console.log('SETTING BOOL TRUE BECAUSE OF', possibleMoves[move])
+            //console.log('SETTING BOOL TRUE BECAUSE OF', possibleMoves[move])
             foundCleanMoves.push(new Move(possibleMoves[move].getPiece(), possibleMoves[move].getEndX(), possibleMoves[move].getEndY(), possibleMoves[move].getStartX(), possibleMoves[move].getStartY()))
         }
     }
@@ -1113,7 +1113,7 @@ export default class DameGame {
     let returnValueForBeat = 0
     let boardScore = 0
 
-    console.log('EVAL PATH', path)
+    //console.log('EVAL PATH', path)
 
 
     // Apply first move of simulation, which will be a maxi move
@@ -1123,11 +1123,11 @@ export default class DameGame {
 
         //console.log(potBeatenPiece, 'POT BEATEN PIECE')
         if(potBeatenPiece && potBeatenPiece.playerId == 1){
-            console.log(path[move], 'gives us infinity')
+            //console.log(path[move], 'gives us infinity')
             returnValueForBeat = Infinity
             return returnValueForBeat
         } else if(potBeatenPiece && potBeatenPiece.playerId == 2){
-            console.log(path[move], 'gives us negative infinity')
+            //console.log(path[move], 'gives us negative infinity')
             returnValueForBeat = -Infinity
             return returnValueForBeat
         }
@@ -1217,7 +1217,7 @@ export default class DameGame {
       if (isMaximizingPlayer) {
           let maxEval: MinimaxResult = { score: -Infinity, path: [] };
           for (const move of this.generateMoves(path, true)) {
-              console.log('CURRENT MOVE', move)
+              //console.log('CURRENT MOVE', move)
               let tempState = newState.map(row => [...row])
               const value = this.minimax(this.applyMove(tempState, move), depth - 1, alpha, beta, false, [move].concat(path));
               //console.log(path, 'Current path')
@@ -1237,7 +1237,7 @@ export default class DameGame {
       } else {
           let minEval: MinimaxResult = { score: Infinity, path: [] };
           for (const move of this.generateMoves(path, false)) {
-              console.log('CURRENT MOVE', move)
+              //console.log('CURRENT MOVE', move)
               let tempState = newState.map(row => [...row])
               const value = this.minimax(this.applyMove(tempState, move), depth - 1, alpha, beta, true, [move].concat(path));
               if (value.score <= minEval.score) {

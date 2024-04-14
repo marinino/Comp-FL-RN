@@ -33,12 +33,14 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightGreenAccent),
         useMaterial3: true,
       ),
-      home: MainScreen(),
+      home: const MainScreen(),
     );
   }
 }
 
 class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -48,7 +50,7 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0; // Index of the current tab
 
   final List<Widget> _screens = [
-    PlotScreen(),
+    const PlotScreen(),
     NewsScreen()
   ];
 
