@@ -1,6 +1,5 @@
+import React, { useEffect, useState } from "react";
 import { Text, View, StyleSheet, ScrollView, TouchableOpacity, Linking } from "react-native"
-import React, { useEffect, useState } from 'react';
-
 
 export default function NewsScreen(){
   
@@ -17,33 +16,32 @@ export default function NewsScreen(){
           console.log("Don't know how to open URI: " + url);
         }
       })
-      .catch(err => console.error('An error occurred', err));
+      .catch(err => console.error("An error occurred", err));
   };
 
   useEffect(() => {
-    fetch('https://newsdata.io/api/1/news?apikey=pub_3479125dc2aa95ff324e8db0dcba1f6dc723f&q=crypto%20news',{
-      method: 'GET',
+    fetch("https://newsdata.io/api/1/news?apikey=pub_3479125dc2aa95ff324e8db0dcba1f6dc723f&q=crypto%20news",{
+      method: "GET",
     })   
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      setData(data.results);
-      setLoading(false);
-    })
-    .catch(error => {
-      setError(error);
-      setLoading(false);
-    });
+      .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+      })
+      .then(data => {
+          setData(data.results);
+          setLoading(false);
+      })
+      .catch(error => {
+          setError(error);
+          setLoading(false);
+      });
   }, []);
 
   if (loading) {
       return <Text>Loading...</Text>;
   }
-  
   if (error) {
       return <Text>Error: {error.message}</Text>;
   }
@@ -67,16 +65,16 @@ const styles = StyleSheet.create({
       flex: 1,
     },
     row: {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      alignItems: 'center',
+      flexDirection: "row",
+      justifyContent: "space-around",
+      alignItems: "center",
       padding: 10,
       borderBottomWidth: 1,
-      borderBottomColor: '#ddd',
+      borderBottomColor: "#ddd",
     },
     cell: {
       flex: 1,
-      textAlign: 'center',
+      textAlign: "center",
     },
     modalView: {
       margin: 20,
@@ -94,7 +92,7 @@ const styles = StyleSheet.create({
       elevation: 5
     },
     webview: {
-      height: '80%',
-      width: '100%'
+      height: "80%",
+      width: "100%"
     },
 });

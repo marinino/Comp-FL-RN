@@ -3,6 +3,7 @@ import { ScrollView, View,  Text, StyleSheet, Button, Modal, TextInput } from 'r
 import Slider from '@react-native-community/slider';
 import { DataContext } from './../App';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CreatePassword = () => {
     const [passwordLength, setPasswordLength] = useState(6);
@@ -19,12 +20,12 @@ const CreatePassword = () => {
 
     const storeData = async (value) => {
       try {
-        const jsonValue = JSON.stringify(value)
-        await AsyncStorage.setItem('@storage_Key', jsonValue)
+        const jsonValue = JSON.stringify(value);
+        await AsyncStorage.setItem('@storage_Key', jsonValue);
       } catch (e) {
-        // saving error
+        console.error('Error saving data', e);
       }
-    }
+    };
 
     const handleDataUpdate = (application, eMail) => {
         data.push({application: application, eMail: eMail, password: generatedPassword})

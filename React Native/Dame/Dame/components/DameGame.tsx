@@ -20,17 +20,18 @@ export default class DameGame {
     this.bestMinimaxMove = new Move(null, -1, -1, -1, -1);
     this.currentTree = null
 
-    this.board[0][1] = new GamePiece(`0-1`, 1, false)
-    this.board[2][3] = new GamePiece(`2-3`, 2, false)
+    //this.board[0][1] = new GamePiece(`0-1`, 1, false)
+
+    //this.board[2][3] = new GamePiece(`3-4`, 2, false)
 
     // Initialisieren des Bretts mit Spielsteinen
     for (let row = 0; row < this.boardSize; row++) {
       for (let col = 0; col < this.boardSize; col++) {
         if ((row + col) % 2 === 1) {
           if (row < 4) {
-            this.board[row][col] = new GamePiece(`${row}-${col}`, 1, false);
+            this.board[row][col] = new GamePiece(`${row}-${col}`, 1);
           } else if (row >= 6) {
-            this.board[row][col] = new GamePiece(`${row}-${col}`, 2, false);
+            this.board[row][col] = new GamePiece(`${row}-${col}`, 2);
           }
         }
       }
@@ -875,16 +876,23 @@ export default class DameGame {
                     return;
                 } else {
                     var boardCopy = this.board.map(row => [...row])
-                    let minimaxRes = this.minimax(boardCopy, 5, -Infinity, Infinity, true, [])
+                    this.minimax(boardCopy, 3, -Infinity, Infinity, true, []).then((minimaxRes) => {
+                        for(node in minimaxRes.path){
+                            //console.log(minimaxRes.path[node].getPiece())
+                        }
+                        console.log(minimaxRes.path, 'PATH')
+                        console.log(minimaxRes, ' is FINAL RESULT', minimaxRes.path[minimaxRes.path.length - 1].getStartY(), minimaxRes.path[minimaxRes.path.length - 1].getStartX()
+                            , minimaxRes.path[minimaxRes.path.length - 1].getEndY(), minimaxRes.path[minimaxRes.path.length - 1].getEndX())
+                        this.movePiece(minimaxRes.path[minimaxRes.path.length - 1].getStartY(), minimaxRes.path[minimaxRes.path.length - 1].getStartX(),
+                            minimaxRes.path[minimaxRes.path.length - 1].getEndY(), minimaxRes.path[minimaxRes.path.length - 1].getEndX())
+                        .then(() => {
+                            resolve()
+                        })
+
+                    })
+
                     //console.log(minimaxRes, ' is FINAL RESULT')
-                    for(node in minimaxRes.path){
-                        //console.log(minimaxRes.path[node].getPiece())
-                    }
-                    console.log(minimaxRes, ' is FINAL RESULT', minimaxRes.path[minimaxRes.path.length - 1].getStartY(), minimaxRes.path[minimaxRes.path.length - 1].getStartX()
-                        , minimaxRes.path[minimaxRes.path.length - 1].getEndY(), minimaxRes.path[minimaxRes.path.length - 1].getEndX())
-                    await this.movePiece(minimaxRes.path[minimaxRes.path.length - 1].getStartY(), minimaxRes.path[minimaxRes.path.length - 1].getStartX(),
-                        minimaxRes.path[minimaxRes.path.length - 1].getEndY(), minimaxRes.path[minimaxRes.path.length - 1].getEndX())
-                    resolve()
+
                 }
 
 
@@ -894,7 +902,9 @@ export default class DameGame {
 
 
             } catch(err) {
-                reject(err)
+                let minimaxRes = await this.minimax(boardCopy, 2, -Infinity, Infinity, true, [])
+                await this.movePiece(minimaxRes.path[minimaxRes.path.length - 1].getStartY(), minimaxRes.path[minimaxRes.path.length - 1].getStartX(),
+                                        minimaxRes.path[minimaxRes.path.length - 1].getEndY(), minimaxRes.path[minimaxRes.path.length - 1].getEndX())
             }
                         // Make the move
               // Change the player, whcih actually already when executing move i guess

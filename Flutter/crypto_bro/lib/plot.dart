@@ -63,8 +63,6 @@ class _PlotScreenState extends State<PlotScreen> {
       bitcoinData.add(DataPoint(el['Date'], el['Currency_Value']));
     }
 
-    log(bitcoinData.toString());
-
   }
 
   void loadDashData() async {

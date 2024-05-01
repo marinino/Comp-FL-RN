@@ -1,26 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet } from "react-native"
-import { Dimensions } from "react-native";
+import { Text, View, StyleSheet, Dimensions } from "react-native";
 import { LineChart } from "react-native-chart-kit";
-import DropDownPicker from 'react-native-dropdown-picker';
-import bitcoinData from './../assets/bitcoin_currency_data_365.json'
-import dashData from './../assets/dash_currency_data_365.json'
-import ethereumData from './../assets/ethereum_currency_data_365.json'
-import stellarData from './../assets/stellar_currency_data_365.json'
-import xprData from './../assets/xpr_currency_data_365.json'
+import DropDownPicker from "react-native-dropdown-picker";
+import bitcoinData from "./../assets/bitcoin_currency_data_365.json";
+import dashData from "./../assets/dash_currency_data_365.json";
+import ethereumData from "./../assets/ethereum_currency_data_365.json";
+import stellarData from "./../assets/stellar_currency_data_365.json";
+import xprData from "./../assets/xpr_currency_data_365.json";
 
-export default function SharesScreen(){
+export default function SharesScreen() {
 
     const [trendColor, setTrendColor] = useState('black');
-
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState(null);
     const [items, setItems] = useState([
-        {label: 'Bitcoin', value: 'bitcoin'},
-        {label: 'Ethereum', value: 'ethereum'},
-        {label: 'XPR', value: 'xpr'},
-        {label: 'Dash', value: 'dash'},
-        {label: 'Stellar', value: 'stellar'},
+      { label: "Bitcoin", value: "bitcoin" },
+      { label: "Ethereum", value: "ethereum" },
+      { label: "XPR", value: "xpr" },
+      { label: "Dash", value: "dash" },
+      { label: "Stellar", value: "stellar" },
     ]);
     const [dataValues, setDataValues] = useState(new Array(50).fill(0))
     const [currentTrend, setCurrentTrend] = useState('')
@@ -34,86 +32,79 @@ export default function SharesScreen(){
     const [dataStellar, setDataStellar] = useState([])
 
     const putValueForDia = async () => {
-
-        console.log('PutValueForDia Called')
-        if(value == 'bitcoin'){
+        if (value === "bitcoin") {
             setDataValues(dataBitcoin)
             getCurrentTrend(dataBitcoin);
-        } else if(value == 'ethereum') {
+        } else if (value === "ethereum") {
             setDataValues(dataEthereum)
             getCurrentTrend(dataEthereum);
-        } else if(value == 'xpr'){
+        } else if (value === "xpr") {
             setDataValues(dataXPR)
             getCurrentTrend(dataXPR);
-        } else if(value == 'dash'){
+        } else if (value === "dash") {
             setDataValues(dataDash)
             getCurrentTrend(dataDash);
-        } else if(value == 'stellar'){
+        } else if (value === "stellar") {
             setDataValues(dataStellar)
             getCurrentTrend(dataStellar);
         } else {
             setDataValues(new Array(50).fill(0))
         }
-
-        
     }
     
     const getCurrentTrend = (dataArray) => {
-        if(dataArray.at(dataArray.length - 1) > dataArray.at(dataArray.length - 2)){
-            console.log('Second Last: ', dataArray.at(dataArray.length - 2), '; Last: ', dataArray.at(dataArray.length - 1))
-            setCurrentTrend('Rising')
-            setTrendColor('green')
-        } else if(dataArray.at(dataArray.length - 1) < dataArray.at(dataArray.length - 2)){
-            console.log('Second Last: ', dataArray.at(dataArray.length - 2), '; Last: ', dataArray.at(dataArray.length - 1))
-            setCurrentTrend('Falling')
-            setTrendColor('red')
+        if (dataArray.at(dataArray.length - 1) > dataArray.at(dataArray.length - 2)) {
+            console.log("Second Last: ", dataArray.at(dataArray.length - 2), '; Last: ', dataArray.at(dataArray.length - 1))
+            setCurrentTrend("Rising")
+            setTrendColor("green")
+        } else if (dataArray.at(dataArray.length - 1) < dataArray.at(dataArray.length - 2)) {
+            console.log("Second Last: ", dataArray.at(dataArray.length - 2), '; Last: ', dataArray.at(dataArray.length - 1))
+            setCurrentTrend("Falling")
+            setTrendColor("red")
         } else {
-            setCurrentTrend('Neutral')
-            setTrendColor('black')
+            setCurrentTrend("Neutral")
+            setTrendColor("black")
         }
     }
     
     useEffect(() => {
         const loadData = () => {
-
-            var bitcoinAsArray = JSON.parse(JSON.stringify(bitcoinData))
-            var ethereumAsArray = JSON.parse(JSON.stringify(ethereumData))
-            var dashAsArray = JSON.parse(JSON.stringify(dashData))
-            var xprAsArray = JSON.parse(JSON.stringify(xprData))
-            var stellarAsArray = JSON.parse(JSON.stringify(stellarData))
-
-
-            var tempLabels = []
+            const bitcoinAsArray = JSON.parse(JSON.stringify(bitcoinData))
+            const ethereumAsArray = JSON.parse(JSON.stringify(ethereumData))
+            const dashAsArray = JSON.parse(JSON.stringify(dashData))
+            const xprAsArray = JSON.parse(JSON.stringify(xprData))
+            const stellarAsArray = JSON.parse(JSON.stringify(stellarData))
+            let tempLabels = []
             bitcoinAsArray.forEach((el) => {
                 tempLabels.push(el.Date)
             })
             setLabels(tempLabels)
 
-            var tempBitcoin = []
+            let tempBitcoin = []
             bitcoinAsArray.forEach((el) => {
                 tempBitcoin.push(el.Currency_Value)
             })
             setDataBitcoin(tempBitcoin)
 
-            var tempDash = []
+            let tempDash = []
             dashAsArray.forEach((el) => {
                 tempDash.push(el.Currency_Value)
             })
             setDataDash(tempDash)
 
-            var tempXPR = []
+            let tempXPR = []
             xprAsArray.forEach((el) => {
                 tempXPR.push(el.Currency_Value)
             })
             setDataXPR(tempXPR)
 
-            var tempStellar = []
+            let tempStellar = []
             stellarAsArray.forEach((el) => {
                 tempStellar.push(el.Currency_Value)
             })
             setDataStellar(tempStellar)
 
-            var tempEthereum = []
+            let tempEthereum = []
             ethereumAsArray.forEach((el) => {
                 tempEthereum.push(el.Currency_Value)
             })
@@ -121,12 +112,10 @@ export default function SharesScreen(){
         }
 
         loadData()
-        
     }, [])
 
     useEffect(() => {
         putValueForDia();
-        
     }, [value])
     
     return(
@@ -168,13 +157,11 @@ export default function SharesScreen(){
                 withDots={false}
                 yAxisInterval={1} // optional, defaults to 1
                 onDataPointClick={(pointData) => {
-                    setSelcetedDetailValue(pointData.value)
+                    setSelectedDetailValue(value)
                 }}
                 
                 chartConfig={{
                     backgroundColor: "#000000",
-                    //backgroundGradientFrom: "#fb8c00",
-                    //backgroundGradientTo: "#ffa726",
                     decimalPlaces: 2, // optional, defaults to 2dp
                     color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                     labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
@@ -196,20 +183,18 @@ export default function SharesScreen(){
             />
             <Text style={[styles.selectedValueText, {color: trendColor}]}>Trend: {currentTrend}</Text>
         </View>
-        
     )
 }
 
 const styles = StyleSheet.create({
     lineChart: {
         flex: 1, // The View will fill the whole screen
-        alignItems: 'center', // Center children horizontally
-        width: '100%',
-        
+        alignItems: "center", // Center children horizontally
+        width: "100%",
     },
     wholeView: {
         flex: 1,
-        alignItems: 'center',
+        alignItems: "center",
         marginLeft: 20,
         width: Dimensions.get("window").width - 40,
     },
@@ -219,11 +204,11 @@ const styles = StyleSheet.create({
     currentValueText: {
         padding: 20,
         fontSize: 25,
-        fontWeight: 'bold'
+        fontWeight: "bold"
     },
     selectedValueText: {
         padding: 20,
         fontSize: 25,
-        fontWeight: 'bold'
+        fontWeight: "bold"
     }
 })

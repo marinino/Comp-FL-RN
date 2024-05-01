@@ -12,6 +12,8 @@ For Flutter we have an average of XYZ FPS in scenario C1, looking at React Nativ
 
 LOC
 
+
+
 Application size
 
 Community as its important for learning
