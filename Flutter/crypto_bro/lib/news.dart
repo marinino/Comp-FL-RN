@@ -54,7 +54,7 @@ class NewsScreen extends StatelessWidget{
             title: const Text('News-Feed'),  // Header label added here
             centerTitle: true,
           ),
-          NewsTable()
+          const NewsTable()
         ]
       )
     );

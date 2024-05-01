@@ -2,29 +2,44 @@ import React, { useState, useContext, useEffect } from 'react';
 import { View, Text, StyleSheet, SectionList, Modal, Button } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { DataContext } from './../App';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeScreen = () => {
 
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const navigation = useNavigation();
-  const { data } = useContext(DataContext);
+  const { data, updateData } = useContext(DataContext);
   const [forceRender, setForceRender] = useState(0); // State variable to force re-render
 
   useEffect(() => {
     navigation.addListener('focus', () => {
       // The screen is focused
       // No need to call updateData here, as it will be triggered in the useFocusEffect
+
       groupDataByFirstLetter();
       handleForceRender()
 
     });
   }, [data]);
 
+  useEffect(() => {
+    retrieveData().then(updateData);
+  }, [])
+
 
   const handleForceRender = () => {
     // Update the state variable to force a re-render
     setForceRender((prev) => prev + 1);
+  };
+
+  const retrieveData = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem('@storage_Key');
+      return jsonValue != null ? JSON.parse(jsonValue) : null;
+    } catch (e) {
+      console.error('Error retrieving data', e);
+    }
   };
 
   const renderItem = ({ item }) => (
@@ -64,11 +79,15 @@ const HomeScreen = () => {
       groupedData[firstLetter].push(item);
     });
 
+    Object.keys(groupedData).forEach(letter => {
+        groupedData[letter].sort((a, b) => a.application.localeCompare(b.application));
+    });
+
     return groupedData;
   };
 
   const groupedData = groupDataByFirstLetter();
-  const sections = Object.keys(groupedData).map(application => ({
+  const sections = Object.keys(groupedData).sort().map(application => ({
     title: application,
     data: groupedData[application],
   }));
