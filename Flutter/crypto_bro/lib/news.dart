@@ -7,7 +7,10 @@ import 'package:url_launcher/url_launcher.dart';
 Future<List<MyDataModel>> fetchData() async {
   http.Response response;
 
+  var startTime;
+
   try{
+    startTime = DateTime.now().millisecondsSinceEpoch;
     response = await http.get(
         Uri.parse('https://newsdata.io/api/1/news?apikey=pub_3479125dc2aa95ff324e8db0dcba1f6dc723f&q=crypto%20news')
     );
@@ -17,6 +20,8 @@ Future<List<MyDataModel>> fetchData() async {
   }
 
   if (response.statusCode == 200) {
+    var currentTime = DateTime.now().millisecondsSinceEpoch;
+    print('Time for request: ' + (startTime - currentTime).toString());
     List<dynamic> values = json.decode(response.body)["results"];
     return values.map((e) => MyDataModel.fromJson(e)).toList();
   } else {
