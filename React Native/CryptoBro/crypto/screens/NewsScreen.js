@@ -20,6 +20,7 @@ export default function NewsScreen(){
   };
 
   useEffect(() => {
+    startTime = new Date()
     fetch("https://newsdata.io/api/1/news?apikey=pub_3479125dc2aa95ff324e8db0dcba1f6dc723f&q=crypto%20news",{
       method: "GET",
     })   
@@ -30,6 +31,8 @@ export default function NewsScreen(){
           return response.json();
       })
       .then(data => {
+          currentTime = new Date()
+           console.log('Time for req: ' + (currentTime - startTime))
           setData(data.results);
           setLoading(false);
       })

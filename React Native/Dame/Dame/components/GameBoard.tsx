@@ -48,7 +48,7 @@ const GameBoard = () => {
       forceUpdate(); // Dies wird die Komponente dazu bringen, sich neu zu rendern
       console.log(`Try computer move` , game.currentPlayer)
 
-      while(game.currentPlayer == 2 && !game.checkWin()){
+      while(game.currentPlayer == 2 && await !game.checkWin()){
         console.log(`Try computer move`)
         await game.simulateComputerMoveWithMiniMax();
         setGame(game)
