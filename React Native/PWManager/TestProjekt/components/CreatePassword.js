@@ -1,7 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { ScrollView, View,  Text, StyleSheet, Button, Modal, TextInput } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { DataContext } from './../App';
+import { DataContext } from '../contexts/DataContext';
+
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -18,19 +19,32 @@ const CreatePassword = () => {
     const { data, updateData } = useContext(DataContext);
     const navigation = useNavigation();
 
+    useEffect(() => {
+        console.log(data)
+    }, [])
+
     const storeData = async (value) => {
       try {
         const jsonValue = JSON.stringify(value);
         await AsyncStorage.setItem('@storage_Key', jsonValue);
+        console.log('Saved data')
       } catch (e) {
         console.error('Error saving data', e);
       }
     };
 
     const handleDataUpdate = (application, eMail) => {
-        data.push({application: application, eMail: eMail, password: generatedPassword})
-        updateData(data);
-        storeData(data)
+        if(data){
+            data.push({application: application, eMail: eMail, password: generatedPassword})
+            updateData(data);
+            storeData(data)
+        } else {
+            tempArray = []
+            tempArray.push({application: application, eMail: eMail, password: generatedPassword})
+            updateData(tempArray);
+            storeData(tempArray)
+        }
+
     };
 
     const decrementNumberOfDigits = () => {
