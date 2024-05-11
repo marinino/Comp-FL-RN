@@ -15,7 +15,8 @@ const createPasswordIcon = require('./assets/icons8-add-100.png');
 
 const Tab = createBottomTabNavigator();
 
-export const DataContext = createContext();
+import { DataContext } from './contexts/DataContext';
+
 
 
 

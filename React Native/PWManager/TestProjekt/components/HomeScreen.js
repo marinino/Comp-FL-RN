@@ -1,31 +1,41 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, SectionList, Modal, Button } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { DataContext } from './../App';
+import { DataContext } from '../contexts/DataContext';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeScreen = () => {
+
+
 
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const navigation = useNavigation();
   const { data, updateData } = useContext(DataContext);
   const [forceRender, setForceRender] = useState(0); // State variable to force re-render
+  const [sections, setSections] = useState([])
 
-  useEffect(() => {
-    navigation.addListener('focus', () => {
-      // The screen is focused
-      // No need to call updateData here, as it will be triggered in the useFocusEffect
+  useFocusEffect(
+          useCallback(() => {
+              console.log(data);
+              retrieveData().then((retrievedData) => {
+                  updateData(retrievedData); // Update your context with the retrieved data
+                  console.log('Data updated:', retrievedData);
+                  const groupedData = groupDataByFirstLetter()
+                  const newSections = Object.keys(groupedData).sort().map(application => ({
+                      title: application,
+                      data: groupedData[application],
+                  }));
+                  setSections(newSections);
+              });
 
-      groupDataByFirstLetter();
-      handleForceRender()
-
-    });
-  }, [data]);
-
-  useEffect(() => {
-    retrieveData().then(updateData);
-  }, [])
+              return () => {
+                  // Any cleanup logic goes here
+                  console.log('Screen is losing focus');
+              };
+          }, [])
+      );
 
 
   const handleForceRender = () => {
@@ -85,12 +95,6 @@ const HomeScreen = () => {
 
     return groupedData;
   };
-
-  const groupedData = groupDataByFirstLetter();
-  const sections = Object.keys(groupedData).sort().map(application => ({
-    title: application,
-    data: groupedData[application],
-  }));
 
   return (
     <View style={styles.container}>
