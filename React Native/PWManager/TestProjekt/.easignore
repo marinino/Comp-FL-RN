@@ -1,34 +1,6 @@
-# Exclude node_modules
-node_modules/
-
-# Exclude build output directories
-build/
-android/app/build/
-ios/build/
-ios/Pods/
-
-# Exclude temporary files and directories
-temp/
-tmp/
-*.log
-*.tmp
-
-# Exclude version control directories
-.git/
-.gitignore
-
-# Exclude IDE/editor config files
-.idea/
-.vscode/
-
-# Exclude other unnecessary files or directories
-*.tar.gz
-*.zip
+node_modules
+.git
+build
+dist
 .DS_Store
-
-# Exclude Expo build directories
-.expo/
-.expo-shared/
-
-# Exclude Gradle caches
-.gradle/
+*.log

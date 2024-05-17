@@ -2,7 +2,6 @@ import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, SectionList, Modal, Button } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { DataContext } from '../contexts/DataContext';
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeScreen = () => {
@@ -10,34 +9,16 @@ const HomeScreen = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const navigation = useNavigation();
   const { data, updateData } = useContext(DataContext);
-  const [forceRender, setForceRender] = useState(0); // State variable to force re-render
   const [sections, setSections] = useState([]);
 
-  useFocusEffect(
-    useCallback(() => {
-      console.log(data);
-      retrieveData().then((retrievedData) => {
-        console.log('Data updated:', retrievedData);
-        updateData(retrievedData); // Update your context with the retrieved data
-        const groupedData = groupDataByFirstLetter(retrievedData);
-        const newSections = Object.keys(groupedData).sort().map(application => ({
-          title: application,
-          data: groupedData[application],
-        }));
-        setSections(newSections);
-      });
-
-      return () => {
-        // Any cleanup logic goes here
-        console.log('Screen is losing focus');
-      };
-    }, [])
-  );
-
-  const handleForceRender = () => {
-    // Update the state variable to force a re-render
-    setForceRender((prev) => prev + 1);
-  };
+  useEffect(() => {
+    const groupedData = groupDataByFirstLetter(data);
+    const newSections = Object.keys(groupedData).sort().map(application => ({
+      title: application,
+      data: groupedData[application],
+    }));
+    setSections(newSections);
+  }, [data]);
 
   const retrieveData = async () => {
     try {
@@ -70,12 +51,10 @@ const HomeScreen = () => {
     </View>
   );
 
-  // Function to group data by the first letter
-  const groupDataByFirstLetter = (data) => {
-    console.log('Grouped by first letter');
+  const groupDataByFirstLetter = (pData) => {
     const groupedData = {};
 
-    data.forEach(item => {
+    pData.forEach(item => {
       const firstLetter = item.application.charAt(0).toUpperCase();
 
       if (!groupedData[firstLetter]) {
@@ -108,7 +87,6 @@ const HomeScreen = () => {
         keyExtractor={(item) => item.application}
       />
 
-      {/* Modal */}
       <Modal visible={isModalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
