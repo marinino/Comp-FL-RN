@@ -35,9 +35,10 @@ const CreatePassword = () => {
 
     const handleDataUpdate = (application, eMail) => {
         if(data){
-            data.push({application: application, eMail: eMail, password: generatedPassword})
-            updateData(data);
-            storeData(data)
+            console.log(data, 'From create')
+            const newData = [...data, { application, eMail, password: generatedPassword }];
+            updateData(newData);
+            storeData(newData);
         } else {
             tempArray = []
             tempArray.push({application: application, eMail: eMail, password: generatedPassword})
