@@ -1,11 +1,8 @@
-import { StyleSheet,  View, Image, TouchableOpacity } from 'react-native';
-import { NavigationContainer, useNavigation  } from '@react-navigation/native';
+import { StyleSheet, View, Image, TouchableOpacity } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-
 import React, { createContext, useState, useEffect } from 'react';
-
 
 import HomeScreen from './components/HomeScreen';
 import CreatePassword from './components/CreatePassword';
@@ -15,77 +12,69 @@ const createPasswordIcon = require('./assets/icons8-add-100.png');
 
 const Tab = createBottomTabNavigator();
 
-import { DataContext } from './contexts/DataContext';
-
-
-
+export const DataContext = createContext();
 
 const App = () => {
-
-  const [data, setData] = useState([
-    { application: 'Amazon', eMail: 'example@mail.com', password: '123456' },
-    { application: 'EBay', eMail: 'example@mail.com', password: '123456' },
-    { application: 'Uni', eMail: 'example@mail.com', password: '123456' },
-    // Add more items as needed
-  ]);
+  const [data, setData] = useState([]);
 
   const updateData = (newData) => {
     setData(newData);
+    storeData(newData); // Save the updated data to AsyncStorage
+  };
+
+  const storeData = async (value) => {
+    try {
+      const jsonValue = JSON.stringify(value);
+      await AsyncStorage.setItem('@storage_Key', jsonValue);
+    } catch (e) {
+      console.error('Error saving data', e);
+    }
   };
 
   // Load data from storage when the app loads
-    useEffect(() => {
-      const loadData = async () => {
-        try {
-          const jsonValue = await AsyncStorage.getItem('@storage_Key');
-          if (jsonValue != null) {
-            const loadedData = JSON.parse(jsonValue);
-            setData(loadedData); // Update the state with loaded data
-          }
-        } catch (e) {
-          console.error('Error loading data', e);
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const jsonValue = await AsyncStorage.getItem('@storage_Key');
+        if (jsonValue != null) {
+          const loadedData = JSON.parse(jsonValue);
+          setData(loadedData); // Update the state with loaded data
         }
-      };
+      } catch (e) {
+        console.error('Error loading data', e);
+      }
+    };
 
-      loadData();
-    }, []); // The empty array means this effect runs once on mount
-
+    loadData();
+  }, []); // The empty array means this effect runs once on mount
 
   return (
-    
-      <DataContext.Provider value={{ data, updateData }}>
-        <NavigationContainer>
-          <Tab.Navigator
-            screenOptions={({ route }) => ({
-              tabBarIcon: ({ focused, color, size }) => {
-                let iconName;
+    <DataContext.Provider value={{ data, updateData }}>
+      <NavigationContainer>
+        <Tab.Navigator
+          screenOptions={({ route }) => ({
+            tabBarIcon: ({ focused, color, size }) => {
+              let iconName;
 
-                if (route.name === 'HomeScreen') {
-                  iconName = homeIcon;
-                } else if (route.name === 'CreatePassword') {
-                  iconName = createPasswordIcon;
-                }
+              if (route.name === 'HomeScreen') {
+                iconName = homeIcon;
+              } else if (route.name === 'CreatePassword') {
+                iconName = createPasswordIcon;
+              }
 
-                // You can return any component that you like here!
-                return <Image source={iconName} style={{ width: size, height: size }} />;
-              },
-              tabBarActiveTintColor: 'tomato',
-              tabBarInactiveTintColor: 'gray',
-            })}
-          >
-            <Tab.Screen name="HomeScreen" component={HomeScreen} />
-            <Tab.Screen name="CreatePassword" component={CreatePassword} />
-            {/* Add more screens as needed */}
-          </Tab.Navigator>
-        </NavigationContainer>
-      </DataContext.Provider>
-      
- 
-    
+              return <Image source={iconName} style={{ width: size, height: size }} />;
+            },
+            tabBarActiveTintColor: 'tomato',
+            tabBarInactiveTintColor: 'gray',
+          })}
+        >
+          <Tab.Screen name="HomeScreen" component={HomeScreen} />
+          <Tab.Screen name="CreatePassword" component={CreatePassword} />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </DataContext.Provider>
   );
-}
-
-
+};
 
 const styles = StyleSheet.create({
   bottomBar: {
@@ -103,9 +92,9 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 24,
-    fontWeight:'bold',
+    fontWeight: 'bold',
     marginTop: '10%',
-    marginLeft: '5%'
+    marginLeft: '5%',
   },
   buttonText: {
     fontSize: 16,
@@ -119,9 +108,7 @@ const styles = StyleSheet.create({
   button: {
     flexDirection: 'row',
     alignItems: 'center',
-  }
+  },
 });
 
 export default App;
-
-

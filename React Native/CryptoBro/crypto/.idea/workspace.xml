@@ -5,24 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="355418d6-0538-4e14-b90e-4becbfae0c01" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../../PWManager/TestProjekt/.easignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/crypto.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/android/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/android/gradle.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/android/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/app.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Dame/Dame/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/../../Dame/Dame/android/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Dame/Dame/android/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/../../Dame/Dame/android/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Dame/Dame/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../Dame/Dame/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Dame/Dame/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../Dame/Dame/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../PWManager/TestProjekt/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../../PWManager/TestProjekt/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../PWManager/TestProjekt/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../PWManager/TestProjekt/app.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../PWManager/TestProjekt/.easignore" beforeDir="false" afterPath="$PROJECT_DIR$/../../PWManager/TestProjekt/.easignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../PWManager/TestProjekt/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../PWManager/TestProjekt/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../PWManager/TestProjekt/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/../../PWManager/TestProjekt/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../PWManager/TestProjekt/components/HomeScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/../../PWManager/TestProjekt/components/HomeScreen.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../PWManager/TestProjekt/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../PWManager/TestProjekt/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../PWManager/TestProjekt/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../PWManager/TestProjekt/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../../Testing/Dame/Test 1 Normal/dart_devtools_2024-02-18_11 36 16.039.csv" beforeDir="false" />
@@ -61,7 +48,7 @@
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Noah Marinic/Documents/GitHub/BA_STUFF/React Native/PWManager/TestProjekt",
+    "last_opened_file_path": "C:/Users/Noah Marinic/Documents/GitHub/BA_STUFF/React Native/CryptoBro/crypto",
     "show.migrate.to.gradle.popup": "false"
   }
 }]]></component>
