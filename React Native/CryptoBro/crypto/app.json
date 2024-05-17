@@ -1,8 +1,9 @@
 {
   "expo": {
-    "name": "m",
+    "name": "crypto",
     "slug": "crypto",
     "version": "1.0.0",
+    "sdkVersion": "51.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -31,6 +32,11 @@
       "assetExts": [
         "csv"
       ]
+    },
+    "extra": {
+      "eas": {
+        "projectId": "db8d418a-192d-47df-9b67-57aaed689278"
+      }
     }
   }
 }
