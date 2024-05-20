@@ -1,42 +1,37 @@
 {
   "expo": {
-    "name": "crypto",
-    "slug": "crypto",
+    "name": "pwmanager",
+    "slug": "pwmanager",
     "version": "1.0.0",
-    "sdkVersion": "51.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "icon": "./assets/images/icon.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/images/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "assets/*"
-    ],
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.crypto"
+      "package": "com.marinino.pwmanager"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
     },
-    "packagerOpts": {
-      "assetExts": [
-        "csv"
-      ]
-    },
-    "extra": {
-      "eas": {
-        "projectId": "db8d418a-192d-47df-9b67-57aaed689278"
-      }
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
     }
   }
 }

@@ -4,17 +4,11 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="355418d6-0538-4e14-b90e-4becbfae0c01" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../PWManager/TestProjekt/.easignore" beforeDir="false" afterPath="$PROJECT_DIR$/../../PWManager/TestProjekt/.easignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../PWManager/TestProjekt/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../PWManager/TestProjekt/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../PWManager/TestProjekt/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/../../PWManager/TestProjekt/App.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../PWManager/TestProjekt/components/HomeScreen.js" beforeDir="false" afterPath="$PROJECT_DIR$/../../PWManager/TestProjekt/components/HomeScreen.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../PWManager/TestProjekt/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../PWManager/TestProjekt/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../PWManager/TestProjekt/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../PWManager/TestProjekt/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Testing/Dame/Test 1 Normal/dart_devtools_2024-02-18_11 36 16.039.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Testing/Dame/Test 1 Normal/dart_devtools_2024-02-18_11 36 24.016.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Testing/Dame/Test 1 Normal/dart_devtools_2024-02-18_11 36 39.384.json" beforeDir="false" />
+    <list default="true" id="3c4d8a39-0afa-4b78-b681-79d65f6d0a93" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/app.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,15 +19,15 @@
     <option name="formatViaClangd" value="false" />
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../.." />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 7
-}</component>
-  <component name="ProjectId" id="2ciyxWWA8AIh1AorGgM3BYcXiva" />
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 0
+}]]></component>
+  <component name="ProjectId" id="2gbKFFDKEQOe3deTdDiSbDqDekT" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -48,18 +42,18 @@
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Noah Marinic/Documents/GitHub/BA_STUFF/React Native/CryptoBro/crypto",
+    "last_opened_file_path": "C:/Users/Noah Marinic/Documents/cleanCrpto/crypto/android",
     "show.migrate.to.gradle.popup": "false"
   }
 }]]></component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="355418d6-0538-4e14-b90e-4becbfae0c01" name="Changes" comment="" />
-      <created>1708608940819</created>
+      <changelist id="3c4d8a39-0afa-4b78-b681-79d65f6d0a93" name="Changes" comment="" />
+      <created>1715960732479</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1708608940819</updated>
+      <updated>1715960732479</updated>
     </task>
     <servers />
   </component>
