@@ -23,7 +23,6 @@ export default function SharesScreen() {
     const [dataValues, setDataValues] = useState(new Array(50).fill(0))
     const [currentTrend, setCurrentTrend] = useState('')
 
-    //const [data, setData] = useState([]);
     const [labels, setLabels] = useState([])
     const [dataBitcoin, setDataBitcoin] = useState([])
     const [dataEthereum, setDataEthereum] = useState([])
