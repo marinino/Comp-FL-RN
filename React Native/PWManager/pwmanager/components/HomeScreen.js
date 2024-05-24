@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { View, Text, StyleSheet, SectionList, Modal, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { DataContext } from '../contexts/DataContext'; // Adjust the path if necessary
+import { DataContext } from '../contexts/DataContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeScreen = () => {
