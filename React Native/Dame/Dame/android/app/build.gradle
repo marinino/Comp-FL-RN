@@ -1,3 +1,4 @@
+
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
@@ -135,7 +136,9 @@ dependencies {
     debugImplementation 'com.facebook.flipper:flipper-network-plugin:0.252.0'
     debugImplementation 'com.facebook.flipper:flipper-fresco-plugin:0.252.0'
     debugImplementation 'com.facebook.flipper:flipper-folly:0.252.0'
+    debugImplementation 'com.facebook.soloader:soloader:0.10.1'
     // releaseImplementation 'com.facebook.flipper:flipper-noop:0.252.0'
+
 
     if (enableHermes) {
         implementation 'com.facebook.react:hermes-engine:+'

@@ -1,5 +1,0 @@
-Bilder Quellen
-
-- Cross-platform mobile frameworks used by software developers worldwide from 2019 to 2022: https://www.statista.com/statistics/869224/worldwide-software-developer-working-hours/
-- Stack Overflow survey 2022: https://survey.stackoverflow.co/2022/#most-popular-technologies-misc-tech-learn
-- Stack Overflow survey 2023: https://survey.stackoverflow.co/2023/#most-popular-technologies-misc-tech-learn
