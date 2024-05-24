@@ -126,10 +126,10 @@ export default class DameGame {
 
                   // Ändert den Spieler, wenn kein weiterer Schlag möglich ist oder es keinen Schlag gab
                   if (beatenPiece != null && movesWhichBeat.getPiece() && !newQueen) {
-                    this.stateString = `Spieler ${this.currentPlayer} bleibt dran`;
+                    this.stateString = `Player ${this.currentPlayer} is next`;
                   } else {
                     this.currentPlayer = 3 - this.currentPlayer;
-                    this.stateString = `Spieler ${this.currentPlayer} ist dran`;
+                    this.stateString = `Player ${this.currentPlayer} can continue`;
                   }
 
 

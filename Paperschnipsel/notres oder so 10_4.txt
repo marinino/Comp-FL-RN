@@ -1,7 +1,0 @@
-notres oder so:
-
-console bei rn beesser zum debuggen
-
-Expo go linter
-
-SharesScreen.js line 160
