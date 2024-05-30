@@ -164,7 +164,7 @@ const renderAnimatedPieces = () => {
   return [animatedPieces];
 };
 
-
+// Supported by CHATGPT from here
   const renderSquare = ({ item }) => {
     const row = Math.floor(item.id / game.boardSize);
     const col = item.id % game.boardSize;
@@ -222,9 +222,9 @@ const renderAnimatedPieces = () => {
     </>
   );
 };
+// to here
 
-
-
+// Supported by CHATGPT from here
 const styles = StyleSheet.create({
   square: {
     width: '10%', // 10 Colums

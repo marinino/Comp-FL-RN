@@ -1,3 +1,4 @@
+// Supported by CHATGPT
 // GamePiece.tsx
 import React from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';

@@ -61,7 +61,9 @@ class AlphabeticalList extends StatelessWidget {
 
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context){
+
+    // Supported by CHATGPT from here
 
     var listProvider = Provider.of<ListProvider>(context);
     List<AlphabeticalListItem> listItems = listProvider.listItems;
@@ -75,6 +77,8 @@ class AlphabeticalList extends StatelessWidget {
     final keys = groupedItems.keys.toList()..sort();
 
     final theme = Theme.of(context);
+
+    // to here
 
     void showPopup(BuildContext context, String password, String application) {
       showDialog(

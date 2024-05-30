@@ -63,6 +63,7 @@ export default function NewsScreen(){
   );
 }
 
+// Supported by CHATGPT from here
 const styles = StyleSheet.create({
     container: {
       flex: 1,

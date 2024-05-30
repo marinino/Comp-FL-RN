@@ -160,6 +160,7 @@ class _PlotScreenState extends State<PlotScreen> {
     }
   }
 
+  // Supported by CHATGPT from here
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -254,6 +255,7 @@ class _PlotScreenState extends State<PlotScreen> {
     );
   }
 }
+// to here
 
 class DataPoint {
 

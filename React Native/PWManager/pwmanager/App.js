@@ -45,6 +45,8 @@ const App = () => {
   );
 };
 
+// Supported by CHATGPT from here
+
 const styles = StyleSheet.create({
   bottomBar: {
     flexDirection: 'row',

@@ -37,7 +37,7 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
   late int _postAnimationEndX;
   late int _postAnimationEndY;
 
-
+  // Supported by CHATGPT from here
   @override
   void initState() {
     super.initState();
@@ -66,6 +66,7 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
     _animationController?.dispose();
     super.dispose();
   }
+  // TO HERE
 
   void _updateGame() {
     setState(() {
@@ -119,6 +120,7 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
     });
   }
 
+  // Supported by CHATGPT from here
   Widget createPieceWidget(Color color, String letter, bool animate, int x, int y) {
     // Create the base piece widget
     Widget piece = Stack(
@@ -162,6 +164,7 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
       child: piece,
     );
   }
+  // to here
 
   Widget buildGamePieces() {
     _screenWidth = MediaQuery.of(context).size.width;
@@ -197,6 +200,7 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
     return Stack(children: pieces);
   }
 
+  // Supported by CHATGPT from here
   Widget buildGameBoard() {
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -224,6 +228,7 @@ class _DameBoardState extends State<DameBoard> with TickerProviderStateMixin {
       },
     );
   }
+  // to here
 
   @override
   Widget build(BuildContext context) {
