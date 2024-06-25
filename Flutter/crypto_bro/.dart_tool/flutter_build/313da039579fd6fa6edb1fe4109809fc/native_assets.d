@@ -1,0 +1,1 @@
+ C:\\Users\\noahm\\Documents\\GitHub\\Comp-FL-RN\\Flutter\\crypto_bro\\.dart_tool\\flutter_build\\313da039579fd6fa6edb1fe4109809fc\\native_assets.yaml: 
